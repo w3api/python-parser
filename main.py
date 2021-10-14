@@ -4,9 +4,9 @@ from elementos import ElementoHTML
 import writer, json
 
 
-URLFUNCIONES = "https://docs.python.org/es/3/library/functions.html"
+#URLFUNCIONES = "https://docs.python.org/es/3/library/functions.html"
 
-# URLFUNCIONES = "https://docs.python.org/es/3/library/stdtypes.html"
+URLFUNCIONES = "https://docs.python.org/es/3/library/stdtypes.html"
 
 ######
 #  dl con class "py function" son las funciones
@@ -24,11 +24,7 @@ URLFUNCIONES = "https://docs.python.org/es/3/library/functions.html"
 
 
 def limpiar(cadena):
-    return " ".join(cadena.split())
-
-
-def limpiar_signatura(cadena):
-    return cadena.replace('¶','')
+    return " ".join(cadena.replace('¶','').split())
 
 def limpiar_parametro(parametro):
     # Hay parámetros que no vienen en detalle y vienen enteros. Del estilo start=0
@@ -38,8 +34,31 @@ def limpiar_parametro(parametro):
     else:
         return parametro
 
-def todos_los_elementos():
 
+def obtener_parametros(nombre):
+    # Chequeamos que tenga parámetros. Están a la misma altura que el nombre.
+    parametros = nombre.find_next_siblings("em", {"class":"sig-param"})
+
+    for parametro in parametros:
+    
+        nombre_parametro = parametro.find("span", {"class":"n"})            
+        if nombre_parametro:
+            print(nombre_parametro.text)
+        else: 
+            print(limpiar_parametro(parametro.text))
+
+def obtener_metodos(clase):
+
+    metodos = clase.find_all("dl", {"class":"py method"})
+    for metodo in metodos:
+
+        sintaxis = metodo.find("dt")        
+        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
+        print ("Método: " + nombre.text)
+        print ("Sintaxis: " + limpiar(sintaxis.text))
+        obtener_parametros(nombre)
+
+def todos_los_elementos():
 
     page = requests.get(URLFUNCIONES)
     soup = BeautifulSoup(page.content, 'html5lib')
@@ -51,23 +70,15 @@ def todos_los_elementos():
     
     for funcion in funciones:
         
-        sintaxis = funcion.find_all("dt",limit=1)
+        sintaxis = funcion.find_all("dt")
 
         for s in sintaxis:
-            print (limpiar_signatura(s.text))
+            print (limpiar(s.text))
             nombre = s.find("code", {"class":"sig-name descname"})        
             print (nombre.text)
+            obtener_parametros(nombre)
 
-            # Chequeamos que tenga parámetros. Están a la misma altura que el nombre.
-            parametros = nombre.find_next_siblings("em", {"class":"sig-param"})
 
-            for parametro in parametros:
-            
-                nombre_parametro = parametro.find("span", {"class":"n"})            
-                if nombre_parametro:
-                    print(nombre_parametro.text)
-                else: 
-                    print(limpiar_parametro(parametro.text))
 
     ## Clases
     clases = soup.find_all("dl", {"class":"py class"})
@@ -75,25 +86,23 @@ def todos_los_elementos():
     
     for clase in clases:
         
-        sintaxis = clase.find_all("dt",limit=2)
+        # Buscamos la primera sintaxis    
+        sintaxis = clase.find("dt")
+        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
+        print ("Clase: " + nombre.text)
+        print ("Signatura: " + limpiar(sintaxis.text))
+        obtener_parametros(nombre)
+        obtener_metodos(clase)
 
-        print (len(sintaxis))
-
-        for s in sintaxis:
-            print (limpiar_signatura(s.text))
+        # Comprobamos si hay dt al mismo nivel con más signatura
+        mas_sintaxis = sintaxis.find_next_siblings("dt")
+        for s in mas_sintaxis:            
             nombre = s.find("code", {"class":"sig-name descname"})        
-            print (nombre.text)
+            print ("Clase: " + nombre.text)
+            print ("Signatura: " + limpiar(s.text))
+            obtener_parametros(nombre)
+            obtener_metodos(clase)
 
-            # Chequeamos que tenga parámetros. Están a la misma altura que el nombre.
-            parametros = nombre.find_next_siblings("em", {"class":"sig-param"})
-
-            for parametro in parametros:
-            
-                nombre_parametro = parametro.find("span", {"class":"n"})            
-                if nombre_parametro:
-                    print(nombre_parametro.text)
-                else: 
-                    print(limpiar_parametro(parametro.text))    
     
 
 
