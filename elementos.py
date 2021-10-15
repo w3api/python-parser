@@ -28,31 +28,33 @@ class Modulo:
     def add_execpcion(self,excepcion):
         self.excepciones.append(excepcion)
 
-    def toString(self):
-        print("Nombre: " + self.nombre)
-        print("Funciones: ")
+    def __str__(self):
+
+        cadena =  "Nombre: " + self.nombre + "\n"
+        cadena +=  "Funciones: \n"
         for funcion in self.funciones:
-            print(">> " + str(funcion))
-        print("Clases: ")
+            cadena += "\t" + str(funcion) + "\n"
+        cadena += "Clases: \n"
         for clase in self.clases:
-            print(">> " + str(clase))
-        print("Constantes: ")
+            cadena += "\t" + str(clase) + "\n"
+        cadena += "Constantes: \n"
         for constante in self.constantes:
-            print(">> " + str(constante))
-        print("Excecpiones: ")
-        for excepcion in self.excepcpiones:
-            print(">> " + str(excepcion))
+            cadena += "\t" + str(constante) + "\n"
+        cadena += "Excecpiones: \n"
+        for excepcion in self.excepciones:
+            cadena += "\t" + str(excepcion) + "\n"
+        return cadena
 
 class Funcion:
 
     nombre = ""
     sintaxis = []
-    parametros = []
+    parametros = set()
 
     def __init__(self):
         self.nombre = ""
         self.sintaxis = []
-        self.parametros = []
+        self.parametros = set()
 
     def nombre(self,nombre):
         self.nombre = nombre
@@ -61,20 +63,22 @@ class Funcion:
         self.sintaxis.append(sintaxis)
 
     def add_parametro(self,parametro):
-        self.parametros.append(parametro)
+        self.parametros.add(parametro)
 
-    def toString(self):
-        print("Nombre: " + self.nombre)
-        print("Sintaxis: ")
-        for s in self.sintraxis:
-            print(">> " + s)
-        print("Parametros: ")
+    def __str__(self):
+        cadena = "Nombre: " + self.nombre + "\n"
+        cadena += "Sintaxis: \n"
+        for s in self.sintaxis:
+            cadena += "\t" + s + "\n"
+        cadena += "Parametros: \n"
         for parametro in self.parametros:
-            print(">> " + parametro)
+            cadena += "\t" + parametro + "\n"
+        return cadena
 
 class Clase:
 
     nombre = ""
+    constructores = []
     metodos = []
     atributos = []
 
@@ -86,32 +90,39 @@ class Clase:
     def nombre(self,nombre):
         self.nombre = nombre
 
+    def add_constructor(self,constructor):
+        self.constructores.append(constructor)
+
     def add_metodo(self,metodo):
         self.metodos.append(metodo)
 
     def add_atributos(self,atributo):
         self.atributos.append(atributo)
 
-    def toString(self):
-        print("Nombre: " + self.nombre)
-        print("Metodos: ")
+    def __str__(self):
+        cadena = "Nombre: " + self.nombre + "\n"
+        cadena += "Constructores: \n"
+        for constructor in self.constructores:
+            cadena += "\t " + str(constructor) + "\n"
+        cadena += "Metodos: \n"
         for metodo in self.metodos:
-            print(">> " + str(metodo))
-        print("Atributos: ")
+            cadena += "\t " + str(metodo) + "\n"
+        cadena += "Atributos: \n"
         for atributo in self.atributos:
-            print(">> " + str(atributo))
+            cadena += "\t" + str(atributo) + "\n"
+        return cadena
 
 
 class Metodo:
 
     nombre = ""
     sintaxis = []
-    parametros = []
+    parametros = set()
 
     def __init__(self):
         self.nombre = ""
         self.sintaxis = []
-        self.parametros = []
+        self.parametros = set()
 
     def nombre(self,nombre):
         self.nombre = nombre
@@ -120,16 +131,17 @@ class Metodo:
         self.sintaxis.append(sintaxis)
 
     def add_parametro(self,parametro):
-        self.parametros.append(parametro)
+        self.parametros.add(parametro)
 
-    def toString(self):
-        print("Nombre: " + self.nombre)
-        print("Sintaxis: ")
-        for s in self.sintraxis:
-            print(">> " + s)
-        print("Parametros: ")
+    def __str__(self):
+        cadena = "Nombre: " + self.nombre + "\n"
+        cadena += "Sintaxis: \n"
+        for s in self.sintaxis:
+            cadena += "\t" + s + "\n"
+        cadena += "Parametros: \n"
         for parametro in self.parametros:
-            print(">> " + parametro)
+            cadena += "\t" + parametro + "\n"
+        return cadena
 
 class Atributo:
 
@@ -146,9 +158,10 @@ class Atributo:
     def sintaxis(self,sintaxis):
         self.sintaxis = sintaxis
 
-    def toString(self):
-        print("Nombre: " + self.nombre)
-        print("Sintaxis: " + self.sintaxis)
+    def __str__(self):        
+        cadena = "Nombre: " + self.nombre + "\n"
+        cadena += "Sintaxis: " + self.sintaxis + "\n"
+        return cadena
 
 class Constante:
 
@@ -165,11 +178,12 @@ class Constante:
     def sintaxis(self,sintaxis):
         self.sintaxis = sintaxis
 
-    def toString(self):
-        print("Nombre: " + self.nombre)
-        print("Sintaxis: " + self.sintaxis)
+    def __str__(self):
+        cadena = "Nombre: " + self.nombre + "\n"
+        cadena += "Sintaxis: " + self.sintaxis + "\n"
+        return cadena
 
-class Excepciones:
+class Excepcion:
 
     nombre = ""
     sintaxis = ""
@@ -184,6 +198,7 @@ class Excepciones:
     def sintaxis(self,sintaxis):
         self.sintaxis = sintaxis
 
-    def toString(self):
-        print("Nombre: " + self.nombre)
-        print("Sintaxis: " + self.sintaxis)
+    def __str__(self):
+        cadena = "Nombre: " + self.nombre + "\n"
+        cadena += "Sintaxis: " + self.sintaxis + "\n"
+        return cadena
