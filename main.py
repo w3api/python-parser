@@ -5,8 +5,15 @@ import writer, json
 
 
 #URLFUNCIONES = "https://docs.python.org/es/3/library/functions.html"
+# URLFUNCIONES = "https://docs.python.org/es/3/library/stdtypes.html"
 
-URLFUNCIONES = "https://docs.python.org/es/3/library/stdtypes.html"
+URLMODULOS = "https://docs.python.org/es/3/py-modindex.html"
+URLMODULOSBASE = "https://docs.python.org/es/3/"
+
+# Ejemplo de Módulo
+# URLFUNCIONES = "https://docs.python.org/es/3/library/time.html"
+URLFUNCIONES =  "https://docs.python.org/es/3/library/sqlite3.html"
+# URLFUNCIONES = "https://docs.python.org/es/3/library/email.errors.html"
 
 ######
 #  dl con class "py function" son las funciones
@@ -51,12 +58,22 @@ def obtener_metodos(clase):
 
     metodos = clase.find_all("dl", {"class":"py method"})
     for metodo in metodos:
-
         sintaxis = metodo.find("dt")        
         nombre = sintaxis.find("code", {"class":"sig-name descname"})        
         print ("Método: " + nombre.text)
         print ("Sintaxis: " + limpiar(sintaxis.text))
         obtener_parametros(nombre)
+
+
+def obtener_atributos(clase):
+
+    atributos = clase.find_all("dl", {"class":"py attribute"})
+    for atributo in atributos:
+        sintaxis = atributo.find("dt")        
+        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
+        print ("Atributo: " + nombre.text)
+        print ("Sintaxis: " + limpiar(sintaxis.text))
+        
 
 def todos_los_elementos():
 
@@ -65,22 +82,29 @@ def todos_los_elementos():
 
     
     ## Funciones
+    print ("----------FUNCIONES----------")
     funciones = soup.find_all("dl", {"class":"py function"})
     print ("Hay " + str(len(funciones)) + " funciones.")
     
     for funcion in funciones:
         
-        sintaxis = funcion.find_all("dt")
+        # Buscamos la primera sintaxis
+        sintaxis = funcion.find("dt")
+        print (limpiar(sintaxis.text))
+        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
+        print (nombre.text)
+        obtener_parametros(nombre)
 
-        for s in sintaxis:
-            print (limpiar(s.text))
+        # Buscamos si hay más sintaxis
+        mas_sintaxis = sintaxis.find_next_siblings("dt")
+        for s in mas_sintaxis:        
+            print (limpiar(s.text))    
             nombre = s.find("code", {"class":"sig-name descname"})        
             print (nombre.text)
-            obtener_parametros(nombre)
-
-
+            obtener_parametros(nombre)            
 
     ## Clases
+    print ("----------CLASES----------")
     clases = soup.find_all("dl", {"class":"py class"})
     print ("Hay " + str(len(clases)) + " clases.")
     
@@ -93,6 +117,7 @@ def todos_los_elementos():
         print ("Signatura: " + limpiar(sintaxis.text))
         obtener_parametros(nombre)
         obtener_metodos(clase)
+        
 
         # Comprobamos si hay dt al mismo nivel con más signatura
         mas_sintaxis = sintaxis.find_next_siblings("dt")
@@ -101,10 +126,95 @@ def todos_los_elementos():
             print ("Clase: " + nombre.text)
             print ("Signatura: " + limpiar(s.text))
             obtener_parametros(nombre)
-            obtener_metodos(clase)
-
+            obtener_metodos(clase)            
+        
+        obtener_atributos(clase)
     
+    # Métodos no asociados directamente a la clase, aunque son de una clase
+    # Hay métodos que son de clases que no se han definido aquí. Hay que mirar su clase base, sino ignorarlos
+    print ("----------METODOS----------")
+    
+    metodos = soup.find_all("dl", {"class":"py method"})
 
+    for metodo in metodos:
+
+        # Hay métodos con varias sintaxis
+        sintaxis = metodo.find_all("dt")
+        
+        for s in sintaxis:
+            # Solo los que son de una clase
+            clase = s.find("code",{"class":"sig-prename descclassname"})
+            if clase:
+                print ("Clase: "+ clase.text)
+                nombre = s.find("code", {"class":"sig-name descname"})        
+                print ("Método: " + nombre.text)
+                print ("Sintaxis: " + limpiar(s.text))
+                obtener_parametros(nombre)
+
+    # Hay atributos que no están debajo de la clase
+    # Hay que mirar su clase base, sino ignorarlos ya que están en clase y ya se han añadido
+    print ("----------ATRIBUTOS----------")
+    atributos = soup.find_all("dl", {"class":"py attribute"})
+    for atributo in atributos:
+        sintaxis = atributo.find("dt")
+        clase = sintaxis.find("code",{"class":"sig-prename descclassname"})
+        if clase:
+            print ("Clase: "+ clase.text)
+            nombre = sintaxis.find("code", {"class":"sig-name descname"})        
+            print ("Atributo: " + nombre.text)
+            print ("Sintaxis: " + limpiar(sintaxis.text))
+
+    # Constantes
+    print ("----------CONSTANTES----------")
+    constantes = soup.find_all("dl", {"class":"py data"})
+    for constante in constantes:
+        sintaxis = constante.find("dt")        
+        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
+        print ("Constante: " + nombre.text)
+        print ("Sintaxis: " + limpiar(sintaxis.text))
+
+    # Excepciones
+    print ("----------EXCEPCIONES---------")
+    excepciones = soup.find_all("dl", {"class":"py exception"})
+    for excepcion in excepciones:
+        sintaxis = excepcion.find("dt")        
+        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
+        print ("Excepcion: " + nombre.text)
+        print ("Sintaxis: " + limpiar(sintaxis.text))
+
+
+def lista_funciones(URL,lista):
+
+    page = requests.get(URL)
+    soup = BeautifulSoup(page.content, 'html5lib')
+
+
+    nombre_capa = URL[URL.index("#")+1:]
+    #print (nombre_capa)
+    
+    capa = soup.find("div",{"id":nombre_capa})
+    if not capa:
+        capa = soup.find("span",{"id":nombre_capa})
+
+    funciones = capa.find_all("dl", {"class":"py function"})
+    
+    for funcion in funciones:    
+        # Buscamos la primera sintaxis
+        sintaxis = funcion.find("dt")
+        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
+
+        if any(dictionary for dictionary in lista if dictionary["nombre"] == nombre.text):
+            print ("COINCIDE " + nombre.text)
+            print (next(dictionary for dictionary in lista if dictionary["nombre"] == nombre.text))
+        else:
+            e = {
+                "nombre": nombre.text,
+                "modulo": nombre_capa
+            }
+            # print(e)
+            lista.append(e)
+
+    return lista
 
 
 # Inicio del Programa
@@ -113,4 +223,23 @@ todos_los_elementos()
 
 
 
+'''
+# Recorrer los módulos
+page = requests.get(URLMODULOS)
+soup = BeautifulSoup(page.content, 'html5lib')
 
+tabla = soup.find("table", {"class":"indextable modindextable"})
+modulos = tabla.find_all("a")
+
+lista = []
+
+for modulo in modulos:
+    print (modulo.text)
+    lista = lista_funciones(URLMODULOSBASE + modulo.get("href"),lista)
+    #print (len(lista))
+
+
+lista = sorted(lista)
+for e in lista:
+    print (e)
+'''
