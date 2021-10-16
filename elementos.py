@@ -84,6 +84,7 @@ class Clase:
 
     def __init__(self):
         self.nombre = ""
+        self.constructores = []
         self.metodos = []
         self.atributos = []        
 
@@ -91,12 +92,19 @@ class Clase:
         self.nombre = nombre
 
     def add_constructor(self,constructor):
-        self.constructores.append(constructor)
+        if (len(self.constructores) == 0):
+            self.constructores.append(constructor)
+        else:
+            for sintaxis in constructor.sintaxis:
+                self.constructores[0].add_sintaxis(sintaxis)
+            for parametro in constructor.parametros:
+                self.constructores[0].add_parametro(parametro)
+            
 
     def add_metodo(self,metodo):
         self.metodos.append(metodo)
 
-    def add_atributos(self,atributo):
+    def add_atributo(self,atributo):
         self.atributos.append(atributo)
 
     def __str__(self):
@@ -111,7 +119,6 @@ class Clase:
         for atributo in self.atributos:
             cadena += "\t" + str(atributo) + "\n"
         return cadena
-
 
 class Metodo:
 
@@ -142,6 +149,39 @@ class Metodo:
         for parametro in self.parametros:
             cadena += "\t" + parametro + "\n"
         return cadena
+
+
+class Constructor:
+
+    nombre = ""
+    sintaxis = set()
+    parametros = set()
+
+    def __init__(self):
+        self.nombre = ""
+        self.sintaxis = set()
+        self.parametros = set()
+
+    def nombre(self,nombre):
+        self.nombre = nombre
+    
+    def add_sintaxis(self,sintaxis):
+        self.sintaxis.add(sintaxis)
+
+    def add_parametro(self,parametro):
+        self.parametros.add(parametro)
+
+    def __str__(self):
+        cadena = "Nombre: " + self.nombre + "\n"
+        cadena += "Sintaxis: \n"
+        for s in self.sintaxis:
+            cadena += "\t" + s + "\n"
+        cadena += "Parametros: \n"
+        for parametro in self.parametros:
+            cadena += "\t" + parametro + "\n"
+        return cadena
+
+
 
 class Atributo:
 
@@ -182,7 +222,7 @@ class Constante:
         cadena = "Nombre: " + self.nombre + "\n"
         cadena += "Sintaxis: " + self.sintaxis + "\n"
         return cadena
-
+    
 class Excepcion:
 
     nombre = ""
