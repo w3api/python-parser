@@ -1,8 +1,7 @@
 import requests, os
 from bs4 import BeautifulSoup
-from elementos import Modulo,Clase,Funcion,Excepcion,Atributo,Metodo,Constante
+from elementos import Modulo,Clase,Funcion,Excepcion,Atributo,Metodo,Constante,Constructor
 import writer, json
-
 
 URLFUNCIONES = "https://docs.python.org/es/3/library/functions.html"
 URLTIPOS = "https://docs.python.org/es/3/library/stdtypes.html"
@@ -28,6 +27,14 @@ URLMODULOSBASE = "https://docs.python.org/es/3/"
 #   dl con class "py class" son clases
 #       hay clases con varios "sig-name descname" que parecen ser varios constructores
 #       una clase puede tener dentro class="py method". Están anidados
+
+
+def set_default(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    else:
+        return obj.__dict__
+    raise TypeError
 
 
 def limpiar(cadena):
@@ -111,20 +118,46 @@ def existe_clase(modulo,nombre_clase):
         return x
     else:
         return -1
-        
 
-def analiza_modulo(nombre_modulo,URL):
+def existe_metodo(dClase,dMetodo):
+
+    encontrado = False
+    x=0
+
+    while ((not encontrado) and (x<len(dClase.metodos))):
+
+
+        if (dClase.metodos[x].nombre == dMetodo.nombre):
+            # Hemos encontrado el método
+            y=0
+            encontradoSintaxis = False            
+
+            while ((not encontradoSintaxis) and (y<len(dClase.metodos[x].sintaxis))):      
+
+                print (y)          
+
+                for sintaxis in dMetodo.sintaxis:
+                    if (dClase.metodos[x].sintaxis[y] == sintaxis):
+                        encontradoSintaxis = True
+                        encontrado = True                    
+                else:
+                    y = y+1
+            
+            if (not encontrado):
+                x = x+1
+        else:
+            x = x+1
+
+    return encontrado    
+
+def analiza_modulo(dModulo,URL):
 
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, 'html5lib')
-
-    dModulo = Modulo()
-    dModulo.nombre = nombre_modulo
     
     ## Funciones
     print ("----------FUNCIONES----------")
-    funciones = soup.find_all("dl", {"class":"py function"})
-    print ("Hay " + str(len(funciones)) + " funciones.")
+    funciones = soup.find_all("dl", {"class":"py function"})    
     
     for funcion in funciones:
 
@@ -153,8 +186,7 @@ def analiza_modulo(nombre_modulo,URL):
 
     ## Clases
     print ("----------CLASES----------")
-    clases = soup.find_all("dl", {"class":"py class"})
-    print ("Hay " + str(len(clases)) + " clases.")
+    clases = soup.find_all("dl", {"class":"py class"})    
     
     for clase in clases:        
         
@@ -167,14 +199,15 @@ def analiza_modulo(nombre_modulo,URL):
         dClase = Clase()
         dClase.nombre =  nombre.text
         
-        dConstructor = Metodo()
+        dConstructor = Constructor()
         dConstructor.nombre = nombre.text
         dConstructor.add_sintaxis(limpiar(sintaxis.text))
         for parametro in parametros:
             dConstructor.add_parametro(parametro)
 
         for metodo in metodos:
-            dClase.add_metodo(metodo)
+            if not existe_metodo(dClase,metodo):   
+                dClase.add_metodo(metodo)
         
 
         # Comprobamos si hay dt al mismo nivel con más signatura
@@ -196,15 +229,22 @@ def analiza_modulo(nombre_modulo,URL):
 
         atributos = obtener_atributos(clase)
         for atributo in atributos:
-            dClase.add_atributos(atributo)
+            dClase.add_atributo(atributo)
 
-
-        for clase in dModulo.clases:
-            print (clase.nombre)
-        print ("--")
-
-
-        dModulo.add_clase(dClase)
+        # Hay que ver si actualizamos sobre una clase que existe o sobre una nueva
+        posicion = existe_clase(dModulo,dClase.nombre)
+        if (posicion >= 0):            
+            # Copiamos toda la dClase a la existente
+            for constructor in dClase.constructores:                
+                dModulo.clases[posicion].add_constructor(constructor)
+            for metodo in dClase.metodos:
+                if not existe_metodo(dModulo.clases[posicion],metodo):
+                    dModulo.clases[posicion].add_metodo(metodo)
+            for atributo in dClase.atributos:
+                dModulo.clases[posicion].add_atributo(atributo)               
+        else:        
+            dModulo.add_clase(dClase)
+             
     
     # Métodos no asociados directamente a la clase, aunque son de una clase
     # Hay métodos que son de clases que no se han definido aquí. Hay que mirar su clase base, sino ignorarlos
@@ -218,6 +258,7 @@ def analiza_modulo(nombre_modulo,URL):
         sintaxis = metodo.find_all("dt")
         
         for s in sintaxis:
+            
             # Solo los que son de una clase
             clase = s.find("code",{"class":"sig-prename descclassname"})
             if clase:                
@@ -228,20 +269,25 @@ def analiza_modulo(nombre_modulo,URL):
                 dMetodo.nombre = nombre.text
                 dMetodo.sintaxis = limpiar(s.text)
                 for parametro in parametros:
-                    dMetodo.add_parametro(parametro)
+                    dMetodo.add_parametro(parametro)                
 
                 # Hay que ver si actualizamos sobre una clase que existe o sobre una nueva
                 posicion = existe_clase(dModulo,clase.text[:-1])
-                if (posicion > 0):
-                    print ("existe clase " + str(posicion))
-                    dModulo.clases[posicion].add_metodo(dMetodo)                    
+     
+                if (posicion >= 0):                
+                    # Chequeamos que el método no existe (nombre y sintaxis)
+                    if not existe_metodo(dModulo.clases[posicion],dMetodo):                        
+                        dModulo.clases[posicion].add_metodo(dMetodo)
+                    else:
+                        print ("metodo repetido " + clase.text[:-1] + "." + dMetodo.nombre)
+
                 else:
                     dClase = Clase()
                     dClase.nombre = clase.text[:-1]
                     dClase.add_metodo(dMetodo)
-                    dModulo.add_clase(dClase)
-                    print ("no existe la clase " + str(posicion))
+                    dModulo.add_clase(dClase)                
 
+               
 
     # Hay atributos que no están debajo de la clase
     # Hay que mirar su clase base, sino ignorarlos ya que están en clase y ya se han añadido
@@ -251,45 +297,81 @@ def analiza_modulo(nombre_modulo,URL):
         sintaxis = atributo.find("dt")
         clase = sintaxis.find("code",{"class":"sig-prename descclassname"})
         if clase:
-            print ("Clase: "+ clase.text)
-            nombre = sintaxis.find("code", {"class":"sig-name descname"})        
-            print ("Atributo: " + nombre.text)
-            print ("Sintaxis: " + limpiar(sintaxis.text))
+            nombre = sintaxis.find("code", {"class":"sig-name descname"})                    
+
+            dAtributo = Atributo()
+            dAtributo.nombre = nombre.text
+            dAtributo.sintaxis = limpiar(sintaxis.text)
+
+            posicion = existe_clase(dModulo,clase.text[:-1])
+            if (posicion >= 0):
+
+                dModulo.clases[posicion].add_atributo(dAtributo)
+            else:
+                dClase = Clase()
+                dClase.nombre = clase.text[:-1]
+                dClase.add_atributo(dAtributo)
+                dModulo.add_clase(dClase)
+ 
 
     # Constantes
     print ("----------CONSTANTES----------")
     constantes = soup.find_all("dl", {"class":"py data"})
     for constante in constantes:
         sintaxis = constante.find("dt")        
-        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
-        print ("Constante: " + nombre.text)
-        print ("Sintaxis: " + limpiar(sintaxis.text))
+        nombre = sintaxis.find("code", {"class":"sig-name descname"})
+
+        dConstante = Constante()
+        dConstante.nombre = nombre.text
+        dConstante.sintaxis = limpiar(sintaxis.text)
+        
+        dModulo.add_constante(dConstante)
 
     # Excepciones
     print ("----------EXCEPCIONES---------")
     excepciones = soup.find_all("dl", {"class":"py exception"})
     for excepcion in excepciones:
         sintaxis = excepcion.find("dt")        
-        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
-        print ("Excepcion: " + nombre.text)
-        print ("Sintaxis: " + limpiar(sintaxis.text))
+        nombre = sintaxis.find("code", {"class":"sig-name descname"})  
+
+        dExcepcion = Excepcion()
+        dExcepcion.nombre = nombre.text
+        dExcepcion.sintaxis = limpiar(sintaxis.text)     
+        
+        dModulo.add_execpcion(dExcepcion)
 
     return dModulo
 
 
+'''
 # Inicio del Programa
 print ("Analizando la documentación Python")
 documentacion = []
 
+
+URLFUNCIONES = "https://docs.python.org/es/3/library/functions.html"
+URLTIPOS = "https://docs.python.org/es/3/library/stdtypes.html"
+URLEXCEPCIONES = "https://docs.python.org/es/3/library/exceptions.html"
+URLMODULOS = "https://docs.python.org/es/3/py-modindex.html"
+URLMODULOSBASE = "https://docs.python.org/es/3/"
+
 # 1. Funciones Base
-print ("1. Funciones Base")
-documentacion.append(analiza_modulo("base","https://docs.python.org/es/3/library/stdtypes.html"))
+print ("Analizando el módulo Base")
+dModulo = Modulo()
+dModulo.nombre = "Base"
+dModulo = analiza_modulo(dModulo,URLFUNCIONES)
 
 # 2. Tipos Base
-
+# Reutilizamos el mismo módulo que la base
+print ("Analizando el módulo Tipos Base")
+dModulo = analiza_modulo(dModulo,URLTIPOS)
 
 # 3. Excepciones Base
+# Reutilizamos el mismo módulo que la base
+print ("Analizando el módulo Excepciones")
+dModulo = analiza_modulo(dModulo,URLEXCEPCIONES)
 
+documentacion.append(dModulo)
 
 # 4. Módulos
 page = requests.get(URLMODULOS)
@@ -298,17 +380,26 @@ soup = BeautifulSoup(page.content, 'html5lib')
 tabla = soup.find("table", {"class":"indextable modindextable"})
 modulos = tabla.find_all("a")
 
-#for modulo in modulos:
-    #print (modulo.text)
-    #lista = lista_funciones(URLMODULOSBASE + modulo.get("href"),lista)
-   
-
-# Imprimimos todo
-#for modulo in documentacion:
-#    print (str(modulo))
+for modulo in modulos:
+    print ("Analizando el módulo " + modulo.text)
+    dModulo = Modulo()
+    dModulo.nombre = modulo.text    
+    dModulo = analiza_modulo(dModulo,URLMODULOSBASE + modulo.get("href"))    
+    documentacion.append(dModulo)
 
 
+# Generamos el JSON
+f = open("data.json","w")
+f.write(json.dumps(documentacion,default=set_default,indent=4))
+f.close()
+'''
 
+
+dModulo = Modulo()
+dModulo = analiza_modulo(dModulo,"https://docs.python.org/es/3/library/zlib.html#module-zlib")
+f = open("data.json","w")
+f.write(json.dumps(dModulo,default=set_default,indent=4))
+f.close()
 
 '''
 def lista_funciones(URL,lista):
