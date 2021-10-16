@@ -125,16 +125,13 @@ def existe_metodo(dClase,dMetodo):
     x=0
 
     while ((not encontrado) and (x<len(dClase.metodos))):
-
-
+        
         if (dClase.metodos[x].nombre == dMetodo.nombre):
             # Hemos encontrado el método
             y=0
             encontradoSintaxis = False            
 
-            while ((not encontradoSintaxis) and (y<len(dClase.metodos[x].sintaxis))):      
-
-                print (y)          
+            while ((not encontradoSintaxis) and (y<len(dClase.metodos[x].sintaxis))):           
 
                 for sintaxis in dMetodo.sintaxis:
                     if (dClase.metodos[x].sintaxis[y] == sintaxis):
@@ -153,7 +150,17 @@ def existe_metodo(dClase,dMetodo):
 def analiza_modulo(dModulo,URL):
 
     page = requests.get(URL)
-    soup = BeautifulSoup(page.content, 'html5lib')
+    base = BeautifulSoup(page.content, 'html5lib')
+
+    # Buscamos el id del DIV o SPAN con el contenido
+    if "#" in URL:
+        nombre_capa = URL[URL.index("#")+1:]  
+
+        soup = base.find("div",{"id":nombre_capa})
+        if not soup:
+            soup = base.find("span",{"id":nombre_capa})
+    else:
+        soup = base
     
     ## Funciones
     print ("----------FUNCIONES----------")
@@ -278,9 +285,6 @@ def analiza_modulo(dModulo,URL):
                     # Chequeamos que el método no existe (nombre y sintaxis)
                     if not existe_metodo(dModulo.clases[posicion],dMetodo):                        
                         dModulo.clases[posicion].add_metodo(dMetodo)
-                    else:
-                        print ("metodo repetido " + clase.text[:-1] + "." + dMetodo.nombre)
-
                 else:
                     dClase = Clase()
                     dClase.nombre = clase.text[:-1]
@@ -342,8 +346,14 @@ def analiza_modulo(dModulo,URL):
 
     return dModulo
 
+def analizar_modulo(URL):
+    # Analiza y genera el JSON de un solo módulo
+    dModulo = Modulo()
+    dModulo = analiza_modulo(dModulo,URL)
+    f = open("data-one.json","w")
+    f.write(json.dumps(dModulo,default=set_default,indent=4))
+    f.close()
 
-'''
 # Inicio del Programa
 print ("Analizando la documentación Python")
 documentacion = []
@@ -392,14 +402,7 @@ for modulo in modulos:
 f = open("data.json","w")
 f.write(json.dumps(documentacion,default=set_default,indent=4))
 f.close()
-'''
 
-
-dModulo = Modulo()
-dModulo = analiza_modulo(dModulo,"https://docs.python.org/es/3/library/zlib.html#module-zlib")
-f = open("data.json","w")
-f.write(json.dumps(dModulo,default=set_default,indent=4))
-f.close()
 
 '''
 def lista_funciones(URL,lista):
