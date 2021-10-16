@@ -1,18 +1,18 @@
 import requests, os
 from bs4 import BeautifulSoup
-from elementos import ElementoHTML
+from elementos import Modulo,Clase,Funcion,Excepcion,Atributo,Metodo,Constante
 import writer, json
 
 
-#URLFUNCIONES = "https://docs.python.org/es/3/library/functions.html"
-# URLFUNCIONES = "https://docs.python.org/es/3/library/stdtypes.html"
-
+URLFUNCIONES = "https://docs.python.org/es/3/library/functions.html"
+URLTIPOS = "https://docs.python.org/es/3/library/stdtypes.html"
+URLEXCEPCIONES = "https://docs.python.org/es/3/library/exceptions.html"
 URLMODULOS = "https://docs.python.org/es/3/py-modindex.html"
 URLMODULOSBASE = "https://docs.python.org/es/3/"
 
 # Ejemplo de Módulo
 # URLFUNCIONES = "https://docs.python.org/es/3/library/time.html"
-URLFUNCIONES =  "https://docs.python.org/es/3/library/sqlite3.html"
+# URLFUNCIONES =  "https://docs.python.org/es/3/library/sqlite3.html"
 # URLFUNCIONES = "https://docs.python.org/es/3/library/email.errors.html"
 
 ######
@@ -45,41 +45,81 @@ def limpiar_parametro(parametro):
 def obtener_parametros(nombre):
     # Chequeamos que tenga parámetros. Están a la misma altura que el nombre.
     parametros = nombre.find_next_siblings("em", {"class":"sig-param"})
+    lista = []
 
     for parametro in parametros:
     
         nombre_parametro = parametro.find("span", {"class":"n"})            
         if nombre_parametro:
-            print(nombre_parametro.text)
+            lista.append(nombre_parametro.text)
         else: 
-            print(limpiar_parametro(parametro.text))
+            lista.append(limpiar_parametro(parametro.text))
+
+    return lista
+
 
 def obtener_metodos(clase):
 
     metodos = clase.find_all("dl", {"class":"py method"})
+    lista = []
+
     for metodo in metodos:
         sintaxis = metodo.find("dt")        
-        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
-        print ("Método: " + nombre.text)
-        print ("Sintaxis: " + limpiar(sintaxis.text))
-        obtener_parametros(nombre)
+        nombre = sintaxis.find("code", {"class":"sig-name descname"})
 
+        dMetodo = Metodo()
+        dMetodo.nombre = nombre.text
+        dMetodo.add_sintaxis(limpiar(sintaxis.text))
+        for parametro in obtener_parametros(nombre):
+            dMetodo.add_parametro(parametro)
 
+        lista.append(dMetodo)
+
+    return lista
+ 
+    
+        
 def obtener_atributos(clase):
 
     atributos = clase.find_all("dl", {"class":"py attribute"})
+    lista = []
+
     for atributo in atributos:
         sintaxis = atributo.find("dt")        
         nombre = sintaxis.find("code", {"class":"sig-name descname"})        
-        print ("Atributo: " + nombre.text)
-        print ("Sintaxis: " + limpiar(sintaxis.text))
+        
+        dAtributo = Atributo()
+        dAtributo.nombre = nombre.text
+        dAtributo.sintaxis = limpiar(sintaxis.text)
+        lista.append(dAtributo)
+
+    return lista
+
+
+def existe_clase(modulo,nombre_clase):
+    
+    encontrado = False
+    x=0
+    
+    while ((not encontrado) and (x<len(modulo.clases))):
+        if modulo.clases[x].nombre == nombre_clase:
+            encontrado = True
+        else:
+            x = x+1
+
+    if encontrado:
+        return x
+    else:
+        return -1
         
 
-def todos_los_elementos():
+def analiza_modulo(nombre_modulo,URL):
 
-    page = requests.get(URLFUNCIONES)
+    page = requests.get(URL)
     soup = BeautifulSoup(page.content, 'html5lib')
 
+    dModulo = Modulo()
+    dModulo.nombre = nombre_modulo
     
     ## Funciones
     print ("----------FUNCIONES----------")
@@ -87,48 +127,84 @@ def todos_los_elementos():
     print ("Hay " + str(len(funciones)) + " funciones.")
     
     for funcion in funciones:
-        
+
         # Buscamos la primera sintaxis
         sintaxis = funcion.find("dt")
-        print (limpiar(sintaxis.text))
         nombre = sintaxis.find("code", {"class":"sig-name descname"})        
-        print (nombre.text)
-        obtener_parametros(nombre)
+        parametros = obtener_parametros(nombre)
+
+        dFuncion = Funcion()
+        dFuncion.nombre = nombre.text
+        dFuncion.add_sintaxis(limpiar(sintaxis.text))
+
+        for parametro in parametros:
+            dFuncion.add_parametro(parametro)
 
         # Buscamos si hay más sintaxis
         mas_sintaxis = sintaxis.find_next_siblings("dt")
-        for s in mas_sintaxis:        
-            print (limpiar(s.text))    
-            nombre = s.find("code", {"class":"sig-name descname"})        
-            print (nombre.text)
-            obtener_parametros(nombre)            
+        for s in mas_sintaxis:                    
+            nombre = s.find("code", {"class":"sig-name descname"})                    
+            parametros = obtener_parametros(nombre)            
+
+            for parametro in parametros:
+                dFuncion.add_parametro(parametro)
+
+        dModulo.add_funcion(dFuncion)            
 
     ## Clases
     print ("----------CLASES----------")
     clases = soup.find_all("dl", {"class":"py class"})
     print ("Hay " + str(len(clases)) + " clases.")
     
-    for clase in clases:
+    for clase in clases:        
         
         # Buscamos la primera sintaxis    
         sintaxis = clase.find("dt")
-        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
-        print ("Clase: " + nombre.text)
-        print ("Signatura: " + limpiar(sintaxis.text))
-        obtener_parametros(nombre)
-        obtener_metodos(clase)
+        nombre = sintaxis.find("code", {"class":"sig-name descname"})                
+        parametros = obtener_parametros(nombre)
+        metodos = obtener_metodos(clase)
+
+        dClase = Clase()
+        dClase.nombre =  nombre.text
+        
+        dConstructor = Metodo()
+        dConstructor.nombre = nombre.text
+        dConstructor.add_sintaxis(limpiar(sintaxis.text))
+        for parametro in parametros:
+            dConstructor.add_parametro(parametro)
+
+        for metodo in metodos:
+            dClase.add_metodo(metodo)
         
 
         # Comprobamos si hay dt al mismo nivel con más signatura
         mas_sintaxis = sintaxis.find_next_siblings("dt")
         for s in mas_sintaxis:            
             nombre = s.find("code", {"class":"sig-name descname"})        
-            print ("Clase: " + nombre.text)
-            print ("Signatura: " + limpiar(s.text))
-            obtener_parametros(nombre)
-            obtener_metodos(clase)            
+            parametros = obtener_parametros(nombre)
+            metodos = obtener_metodos(clase)         
+ 
+            dConstructor.add_sintaxis(limpiar(s.text))
+            for parametro in parametros:
+                dConstructor.add_parametro(parametro)
+
+            for metodo in metodos:
+                dClase.add_metodo(metodo)
         
-        obtener_atributos(clase)
+
+        dClase.add_constructor(dConstructor)
+
+        atributos = obtener_atributos(clase)
+        for atributo in atributos:
+            dClase.add_atributos(atributo)
+
+
+        for clase in dModulo.clases:
+            print (clase.nombre)
+        print ("--")
+
+
+        dModulo.add_clase(dClase)
     
     # Métodos no asociados directamente a la clase, aunque son de una clase
     # Hay métodos que son de clases que no se han definido aquí. Hay que mirar su clase base, sino ignorarlos
@@ -144,12 +220,28 @@ def todos_los_elementos():
         for s in sintaxis:
             # Solo los que son de una clase
             clase = s.find("code",{"class":"sig-prename descclassname"})
-            if clase:
-                print ("Clase: "+ clase.text)
+            if clase:                
                 nombre = s.find("code", {"class":"sig-name descname"})        
-                print ("Método: " + nombre.text)
-                print ("Sintaxis: " + limpiar(s.text))
-                obtener_parametros(nombre)
+                parametros = obtener_parametros(nombre)
+
+                dMetodo = Metodo()
+                dMetodo.nombre = nombre.text
+                dMetodo.sintaxis = limpiar(s.text)
+                for parametro in parametros:
+                    dMetodo.add_parametro(parametro)
+
+                # Hay que ver si actualizamos sobre una clase que existe o sobre una nueva
+                posicion = existe_clase(dModulo,clase.text[:-1])
+                if (posicion > 0):
+                    print ("existe clase " + str(posicion))
+                    dModulo.clases[posicion].add_metodo(dMetodo)                    
+                else:
+                    dClase = Clase()
+                    dClase.nombre = clase.text[:-1]
+                    dClase.add_metodo(dMetodo)
+                    dModulo.add_clase(dClase)
+                    print ("no existe la clase " + str(posicion))
+
 
     # Hay atributos que no están debajo de la clase
     # Hay que mirar su clase base, sino ignorarlos ya que están en clase y ya se han añadido
@@ -182,7 +274,43 @@ def todos_los_elementos():
         print ("Excepcion: " + nombre.text)
         print ("Sintaxis: " + limpiar(sintaxis.text))
 
+    return dModulo
 
+
+# Inicio del Programa
+print ("Analizando la documentación Python")
+documentacion = []
+
+# 1. Funciones Base
+print ("1. Funciones Base")
+documentacion.append(analiza_modulo("base","https://docs.python.org/es/3/library/stdtypes.html"))
+
+# 2. Tipos Base
+
+
+# 3. Excepciones Base
+
+
+# 4. Módulos
+page = requests.get(URLMODULOS)
+soup = BeautifulSoup(page.content, 'html5lib')
+
+tabla = soup.find("table", {"class":"indextable modindextable"})
+modulos = tabla.find_all("a")
+
+#for modulo in modulos:
+    #print (modulo.text)
+    #lista = lista_funciones(URLMODULOSBASE + modulo.get("href"),lista)
+   
+
+# Imprimimos todo
+#for modulo in documentacion:
+#    print (str(modulo))
+
+
+
+
+'''
 def lista_funciones(URL,lista):
 
     page = requests.get(URL)
@@ -215,31 +343,9 @@ def lista_funciones(URL,lista):
             lista.append(e)
 
     return lista
-
-
-# Inicio del Programa
-print ("Analizando la documentación Python")
-todos_los_elementos()
-
-
-
 '''
-# Recorrer los módulos
-page = requests.get(URLMODULOS)
-soup = BeautifulSoup(page.content, 'html5lib')
-
-tabla = soup.find("table", {"class":"indextable modindextable"})
-modulos = tabla.find_all("a")
-
-lista = []
-
-for modulo in modulos:
-    print (modulo.text)
-    lista = lista_funciones(URLMODULOSBASE + modulo.get("href"),lista)
-    #print (len(lista))
 
 
-lista = sorted(lista)
-for e in lista:
-    print (e)
-'''
+
+
+
