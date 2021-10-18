@@ -130,14 +130,14 @@ def gen_descripcion(base):
 def gen_constructores(constructores,nombre):
     c = ["## Constructores\n"]
     for constructor in constructores:
-        c.append("* [" + constructor + "](/Python/" + nombre + "/" + constructor + "/)\n")
+        c.append("* [" + constructor.nombre + "](/Python/" + nombre + "/" + constructor.nombre + "/)\n")
     c.append("\n")
-    return m
+    return c
 
 def gen_metodos(metodos,nombre):
     m = ["## Métodos\n"]
     for metodo in metodos:
-        m.append("* [" + metodo + "](/Python/" + nombre + "/" + metodo + "/)\n")
+        m.append("* [" + metodo.nombre + "](/Python/" + nombre + "/" + metodo.nombre + "/)\n")
     m.append("\n")
     return m
 
@@ -161,7 +161,7 @@ def gen_parametros_funcion(parametros,clave):
 def gen_atributos(atributos,nombre):
     a = ["## Atributos\n"]
     for atributo in atributos:
-        a.append("* [" + atributo + "](/Python/" + nombre + "/" + atributo + "/)\n")
+        a.append("* [" + atributo.nombre + "](/Python/" + nombre + "/" + atributo.nombre + "/)\n")
     a.append("\n")
     return a
 
@@ -175,6 +175,14 @@ def gen_clasepadre(nombre,path):
 def gen_infometodo(clave,tipo,valor):
     bm = ["{% include w3api/datos.html clase=site.data." + clave + "." + tipo + " valor=\"" + valor +"\" %}\n\n"]
     return bm
+
+
+def gen_elemento(elementos,nombre,path):
+    e = ["## " + nombre + "\n"]
+    for elemento in elementos:
+        e.append("* [" + elemento.nombre + "](" + path + "/" + elemento.nombre + "/)\n")
+    e.append("\n")
+    return e
 
 
 def doc_constante(constante,nombre_modulo):
@@ -205,7 +213,7 @@ def doc_constante(constante,nombre_modulo):
 
     tags = []
     tags.append("constante python")     
-    tags.append(nombre_modulo)
+    tags.append(nombre_modulo.replace(".","-"))
 
     if not nombre_modulo == "base":
         cabecera = gen_cabecera(nombre_modulo + "." + constante.nombre,path,clave, tags)
@@ -258,7 +266,7 @@ def doc_excepcion(excepcion,nombre_modulo):
 
     tags = []
     tags.append("excepcion python")     
-    tags.append(nombre_modulo)
+    tags.append(nombre_modulo.replace(".","-")
 
     if not nombre_modulo == "base":
         cabecera = gen_cabecera(nombre_modulo + "." + excepcion.nombre,path,clave, tags)
@@ -312,7 +320,7 @@ def doc_funcion(funcion,nombre_modulo):
     
     tags = []
     tags.append("funcion python")     
-    tags.append(nombre_modulo)
+    tags.append(nombre_modulo.replace(".","-")
 
 
     if not nombre_modulo == "base":
@@ -376,7 +384,7 @@ def doc_clase(clase,nombre_modulo):
     
     tags = []
     tags.append("clase python")     
-    tags.append(nombre_modulo)
+    tags.append(nombre_modulo.replace(".","-")
 
 
     if not nombre_modulo == "base":
@@ -391,11 +399,11 @@ def doc_clase(clase,nombre_modulo):
     descripcion = gen_descripcion("site.data." + jsonsource)
     f.writelines(descripcion)
 
-    sintaxis = gen_sintaxis(clase.sintaxis)
-    f.writelines(sintaxis)
+    #sintaxis = gen_sintaxis(clase.sintaxis)
+    #f.writelines(sintaxis)
 
     if clase.constructores:
-        constructores = gen_constructores(clase.cosntructores,basepath)
+        constructores = gen_constructores(clase.constructores,basepath)
         f.writelines(constructores)
 
     if clase.metodos:
@@ -422,3 +430,58 @@ def doc_clase(clase,nombre_modulo):
 #        doc_eventosHTML(e)
 
     doc_JSON(clase,nombre_modulo)
+
+
+def doc_modulo(modulo):
+
+
+    if not modulo.nombre == "base":        
+        path = "/Python/" + modulo.nombre.replace(".","-") + "/"  
+    else:    
+        path = "/Python/" 
+
+    basepath = modulo.nombre.replace(".","-")
+    clave = "Python."+modulo.nombre[0]+ "." + modulo.nombre 
+    jsonsource = "Python." + modulo.nombre[0] + "." + modulo.nombre.replace(".","") # Las base JSON compuestas se accede sin punto
+              
+
+    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+
+    f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + modulo.nombre + ".md","w")
+
+    tags = []
+    tags.append("modulo python")     
+
+    cabecera = gen_cabecera(modulo.nombre,"/Python/"+basepath,clave, tags)
+    f.writelines(cabecera)
+
+    descripcion = gen_descripcion("site.data." + jsonsource)
+    f.writelines(descripcion)
+
+    if modulo.funciones:
+        funciones = gen_elemento(modulo.funciones,"Funciones",path)
+        f.writelines(funciones)
+    
+    if modulo.clases:
+        clases = gen_elemento(modulo.clases,"Clases",path)
+        f.writelines(clases)
+ 
+    if modulo.excepciones:
+        excepciones = gen_elemento(modulo.excepciones,"Excepciones",path)
+        f.writelines(excepciones)
+ 
+    if modulo.constantes:
+        constantes = gen_elemento(modulo.constantes,"Constantes",path)
+        f.writelines(constantes)
+ 
+    ejemplo = gen_ejemplo("site.data." + jsonsource)
+    f.writelines(ejemplo)
+
+    ldc = gen_ldc("site.data." + jsonsource)
+    f.writelines(ldc)
+
+
+    f.close()
+
+    #doc_JSON(clase,nombre_modulo)
