@@ -186,17 +186,17 @@ class Constructor:
 class Atributo:
 
     nombre = ""
-    sintaxis = ""
+    sintaxis = []
     
     def __init__(self):
         self.nombre = ""
-        self.sintaxis = ""
+        self.sintaxis = []
 
     def nombre(self,nombre):
         self.nombre = nombre
     
-    def sintaxis(self,sintaxis):
-        self.sintaxis = sintaxis
+    def add_sintaxis(self,sintaxis):
+        self.sintaxis.append(sintaxis)
 
     def __str__(self):        
         cadena = "Nombre: " + self.nombre + "\n"
@@ -210,13 +210,13 @@ class Constante:
     
     def __init__(self):
         self.nombre = ""
-        self.sintaxis = ""
+        self.sintaxis = []
 
     def nombre(self,nombre):
         self.nombre = nombre
     
-    def sintaxis(self,sintaxis):
-        self.sintaxis = sintaxis
+    def add_sintaxis(self,sintaxis):
+        self.sintaxis.append(sintaxis)
 
     def __str__(self):
         cadena = "Nombre: " + self.nombre + "\n"
@@ -230,13 +230,13 @@ class Excepcion:
     
     def __init__(self):
         self.nombre = ""
-        self.sintaxis = ""
+        self.sintaxis = []
 
     def nombre(self,nombre):
         self.nombre = nombre
     
-    def sintaxis(self,sintaxis):
-        self.sintaxis = sintaxis
+    def add_sintaxis(self,sintaxis):
+        self.sintaxis.append(sintaxis)
 
     def __str__(self):
         cadena = "Nombre: " + self.nombre + "\n"
