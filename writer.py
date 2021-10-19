@@ -197,6 +197,11 @@ def gen_metodos(metodos,nombre):
 def gen_parametros(parametros):
     p = ["## Parámetros\n"]
     for parametro in parametros:
+        
+        # Hay parámetros que son asteriscos
+        if parametro=="*":
+            parametro = "\*"
+
         p.append("* **" + html.escape(parametro) + "**,  ")
         p.append("{% include w3api/param_description.html metodo=_dato parametro=\"" + parametro + "\" %}\n")
     p.append("\n")
@@ -218,7 +223,7 @@ def gen_atributos(atributos,nombre):
     return a
 
 def gen_clasepadre(nombre,path):
-    cp = ["## Elemento Padre\n",
+    cp = ["## Clase Padre\n",
           "[" + nombre + "](/Python/"+ path.replace(".","/") + "/)\n\n"]
 
     return cp
