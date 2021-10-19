@@ -53,6 +53,59 @@ def doc_JSON(elemento,nombre_modulo):
             p.append(parametro_json)
         data_json["parametros"] = p
 
+    if hasattr(elemento,"atributos"):
+        a = []
+        for atributo in elemento.atributos:
+            atributo_json = {}
+            atributo_json["nombre"] = atributo.nombre
+            atributo_json["description"] = ""
+            atributo_json["code"] = ""
+            atributo_json["ldc"] = []
+                    
+            a.append(atributo_json)
+        data_json["atributos"] = a
+
+    if hasattr(elemento,"metodos"):
+        m = []
+        for metodo in elemento.metodos:
+            metodo_json = {}
+            metodo_json["nombre"] = metodo.nombre
+            metodo_json["description"] = ""
+            metodo_json["code"] = ""
+            metodo_json["ldc"] = []
+
+            if hasattr(metodo,"parametros"):
+                p = []
+                for parametro in metodo.parametros:
+                    parametro_json = {}
+                    parametro_json["nombre"] = parametro
+                    parametro_json["description"] = ""                    
+                    p.append(parametro_json)                
+                metodo_json["parametros"] = p
+
+            m.append(metodo_json)
+        data_json["metodos"] = m
+
+    if hasattr(elemento,"constructores"):
+        c = []
+        for constructor in elemento.constructores:
+            constructor_json = {}
+            constructor_json["nombre"] = constructor.nombre
+            constructor_json["description"] = ""
+            constructor_json["code"] = ""
+            constructor_json["ldc"] = []
+
+            if hasattr(constructor,"parametros"):
+                p = []
+                for parametro in constructor.parametros:
+                    parametro_json = {}
+                    parametro_json["nombre"] = parametro
+                    parametro_json["description"] = ""                    
+                    p.append(parametro_json)                
+                constructor_json["parametros"] = p
+
+            m.append(constructor_json)
+        data_json["constructores"] = m
 
     f.write(json.dumps(data_json,indent=4))
     f.close()
@@ -156,7 +209,6 @@ def gen_parametros_funcion(parametros,clave):
         p.append("{% include w3api/function_param_description.html propiedad=" + clave + " valor=\"" + parametro + "\" %}\n")
     p.append("\n")
     return p    
-
             
 def gen_atributos(atributos,nombre):
     a = ["## Atributos\n"]
@@ -164,7 +216,6 @@ def gen_atributos(atributos,nombre):
         a.append("* [" + atributo.nombre + "](/Python/" + nombre + "/" + atributo.nombre + "/)\n")
     a.append("\n")
     return a
-
 
 def gen_clasepadre(nombre,path):
     cp = ["## Elemento Padre\n",
@@ -176,7 +227,6 @@ def gen_infometodo(clave,tipo,valor):
     bm = ["{% include w3api/datos.html clase=site.data." + clave + "." + tipo + " valor=\"" + valor +"\" %}\n\n"]
     return bm
 
-
 def gen_elemento(elementos,nombre,path):
     e = ["## " + nombre + "\n"]
     for elemento in elementos:
@@ -184,13 +234,7 @@ def gen_elemento(elementos,nombre,path):
     e.append("\n")
     return e
 
-
 def doc_constante(constante,nombre_modulo):
-
-    # Recibe el objeto
-    # Nombre del módulo
-    # El path del fichero "clase" o "modulo/clase" o "modulo/clase/metodo"
-    # El tipo que quiere plasmar "modulo","clase","funcion","método","constante","atributo"
 
     if not nombre_modulo == "base":
         basepath = nombre_modulo.replace(".","-") + "/" + constante.nombre
@@ -240,11 +284,6 @@ def doc_constante(constante,nombre_modulo):
 
 def doc_excepcion(excepcion,nombre_modulo):
 
-    # Recibe el objeto
-    # Nombre del módulo
-    # El path del fichero "clase" o "modulo/clase" o "modulo/clase/metodo"
-    # El tipo que quiere plasmar "modulo","clase","funcion","método","constante","atributo"
-
     if not nombre_modulo == "base":
         basepath = nombre_modulo.replace(".","-") + "/" + excepcion.nombre
         clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + excepcion.nombre
@@ -263,10 +302,9 @@ def doc_excepcion(excepcion,nombre_modulo):
 
     f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + excepcion.nombre + ".md","w")
 
-
     tags = []
     tags.append("excepcion python")     
-    tags.append(nombre_modulo.replace(".","-")
+    tags.append(nombre_modulo.replace(".","-"))
 
     if not nombre_modulo == "base":
         cabecera = gen_cabecera(nombre_modulo + "." + excepcion.nombre,path,clave, tags)
@@ -293,11 +331,6 @@ def doc_excepcion(excepcion,nombre_modulo):
 
 def doc_funcion(funcion,nombre_modulo):
 
-    # Recibe el objeto
-    # Nombre del módulo
-    # El path del fichero "clase" o "modulo/clase" o "modulo/clase/metodo"
-    # El tipo que quiere plasmar "modulo","clase","funcion","método","constante","atributo"
-
     if not nombre_modulo == "base":
         basepath = nombre_modulo.replace(".","-") + "/" + funcion.nombre
         clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + funcion.nombre
@@ -320,7 +353,7 @@ def doc_funcion(funcion,nombre_modulo):
     
     tags = []
     tags.append("funcion python")     
-    tags.append(nombre_modulo.replace(".","-")
+    tags.append(nombre_modulo.replace(".","-"))
 
 
     if not nombre_modulo == "base":
@@ -351,12 +384,6 @@ def doc_funcion(funcion,nombre_modulo):
 
     f.close()
 
-#    if e.atributos:
-#        doc_atributosHTML(e)
-
-#    if e.eventos:
-#        doc_eventosHTML(e)
-
     doc_JSON(funcion,nombre_modulo)
 
 
@@ -384,7 +411,7 @@ def doc_clase(clase,nombre_modulo):
     
     tags = []
     tags.append("clase python")     
-    tags.append(nombre_modulo.replace(".","-")
+    tags.append(nombre_modulo.replace(".","-"))
 
 
     if not nombre_modulo == "base":
@@ -423,22 +450,200 @@ def doc_clase(clase,nombre_modulo):
 
     f.close()
 
-#    if e.atributos:
-#        doc_atributosHTML(e)
+    if clase.constructores:
+        doc_constructor(clase,nombre_modulo)
+        
+    if clase.metodos:
+        doc_metodo(clase,nombre_modulo)
 
-#    if e.eventos:
-#        doc_eventosHTML(e)
+    if clase.atributos:
+        doc_atributo(clase,nombre_modulo)
 
     doc_JSON(clase,nombre_modulo)
 
+def doc_atributo(clase,nombre_modulo):
+
+    if not nombre_modulo == "base":
+        basepath = nombre_modulo.replace(".","-") + "/" + clase.nombre    
+    else:
+        basepath = clase.nombre
+
+    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+
+
+    for atributo in clase.atributos:
+
+        if not nombre_modulo == "base":            
+            clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + clase.nombre + "." + atributo.nombre
+            jsonsource = "Python." + nombre_modulo[0] + "." + nombre_modulo.replace(".","") + "." + clase.nombre # Las base JSON compuestas se accede sin punto
+            path = "/Python/"+basepath + "/" + atributo.nombre + "/"  
+        
+        else:            
+            clave = "Python."+clase.nombre[0]+ "." + clase.nombre + "." + atributo.nombre
+            jsonsource = "Python." + clase.nombre[0] + "." + clase.nombre # Las base JSON compuestas se accede sin punto
+            path = "/Python/"+basepath + "/" + atributo.nombre + "/"
+
+        f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + clase.nombre + "." + atributo.nombre + ".md","w")
+
+        tags = []
+        tags.append("atributo python")     
+        tags.append(nombre_modulo.replace(".","-"))
+
+        if not nombre_modulo == "base":
+            cabecera = gen_cabecera(nombre_modulo + "." + clase.nombre + "." + atributo.nombre,path,clave, tags)
+        else:
+            cabecera = gen_cabecera(clase.nombre + "." + atributo.nombre,path,clave, tags)
+        f.writelines(cabecera)
+
+        info_metodo = gen_infometodo(jsonsource,"atributos",atributo.nombre)
+        f.writelines(info_metodo)
+
+        descripcion = gen_descripcion("_dato")
+        f.writelines(descripcion)
+
+        sintaxis = gen_sintaxis(atributo.sintaxis)
+        f.writelines(sintaxis)
+
+        clase_padre = gen_clasepadre(clase.nombre,basepath)
+        f.writelines(clase_padre)
+
+        ejemplo = gen_ejemplo("_dato")
+        f.writelines(ejemplo)
+
+        ldc = gen_ldc("_dato")
+        f.writelines(ldc)
+
+        f.close()
+
+def doc_metodo(clase,nombre_modulo):
+
+    if not nombre_modulo == "base":
+        basepath = nombre_modulo.replace(".","-") + "/" + clase.nombre 
+    else:
+        basepath = clase.nombre
+        
+
+    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+
+
+    for metodo in clase.metodos:
+
+        if not nombre_modulo == "base":            
+            clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + clase.nombre + "." + metodo.nombre
+            jsonsource = "Python." + nombre_modulo[0] + "." + nombre_modulo.replace(".","") + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
+            path = "/Python/"+basepath + "/" + metodo.nombre + "/"  
+        
+        else:            
+            clave = "Python."+clase.nombre[0]+ "." + clase.nombre + "." + metodo.nombre
+            jsonsource = "Python." + clase.nombre[0] + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
+            path = "/Python/"+basepath + "/" + metodo.nombre + "/"
+
+        f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + clase.nombre + "." + metodo.nombre + ".md","w")
+
+        tags = []
+        tags.append("metodo python")     
+        tags.append(nombre_modulo.replace(".","-"))
+
+        if not nombre_modulo == "base":
+            cabecera = gen_cabecera(nombre_modulo + "." + clase.nombre + "." + metodo.nombre,path,clave, tags)
+        else:
+            cabecera = gen_cabecera(clase.nombre + "." + metodo.nombre,path,clave, tags)
+        f.writelines(cabecera)
+
+        info_metodo = gen_infometodo(jsonsource,"metodos",metodo.nombre)
+        f.writelines(info_metodo)
+
+        descripcion = gen_descripcion("_dato")
+        f.writelines(descripcion)
+
+        sintaxis = gen_sintaxis(metodo.sintaxis)
+        f.writelines(sintaxis)
+
+        if metodo.parametros:
+            parametros = gen_parametros_funcion(metodo.parametros,"site.data." + clave)
+            f.writelines(parametros)
+
+        clase_padre = gen_clasepadre(clase.nombre,basepath)
+        f.writelines(clase_padre)
+
+        ejemplo = gen_ejemplo("_dato")
+        f.writelines(ejemplo)
+
+        ldc = gen_ldc("_dato")
+        f.writelines(ldc)
+
+        f.close()
+
+def doc_constructor(clase,nombre_modulo):
+
+    if not nombre_modulo == "base":
+        basepath = nombre_modulo.replace(".","-") + "/" + clase.nombre 
+    else:
+        basepath = clase.nombre
+        
+
+    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+
+
+    for metodo in clase.constructores:
+
+        if not nombre_modulo == "base":            
+            clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + clase.nombre + "." + metodo.nombre
+            jsonsource = "Python." + nombre_modulo[0] + "." + nombre_modulo.replace(".","") + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
+            path = "/Python/"+basepath + "/" + metodo.nombre + "/"  
+        
+        else:            
+            clave = "Python."+clase.nombre[0]+ "." + clase.nombre + "." + metodo.nombre
+            jsonsource = "Python." + clase.nombre[0] + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
+            path = "/Python/"+basepath + "/" + metodo.nombre + "/"
+
+        f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + clase.nombre + "." + metodo.nombre + ".md","w")
+
+        tags = []
+        tags.append("constructor python")     
+        tags.append(nombre_modulo.replace(".","-"))
+
+        if not nombre_modulo == "base":
+            cabecera = gen_cabecera(nombre_modulo + "." + clase.nombre + "." + metodo.nombre,path,clave, tags)
+        else:
+            cabecera = gen_cabecera(clase.nombre + "." + metodo.nombre,path,clave, tags)
+        f.writelines(cabecera)
+
+        info_metodo = gen_infometodo(jsonsource,"constructores",metodo.nombre)
+        f.writelines(info_metodo)
+
+        descripcion = gen_descripcion("_dato")
+        f.writelines(descripcion)
+
+        sintaxis = gen_sintaxis(metodo.sintaxis)
+        f.writelines(sintaxis)
+
+        if metodo.parametros:
+            parametros = gen_parametros_funcion(metodo.parametros,"site.data." + clave)
+            f.writelines(parametros)
+
+        clase_padre = gen_clasepadre(clase.nombre,basepath)
+        f.writelines(clase_padre)
+
+        ejemplo = gen_ejemplo("_dato")
+        f.writelines(ejemplo)
+
+        ldc = gen_ldc("_dato")
+        f.writelines(ldc)
+
+        f.close()
+    
 
 def doc_modulo(modulo):
 
 
     if not modulo.nombre == "base":        
-        path = "/Python/" + modulo.nombre.replace(".","-") + "/"  
+        path = "/Python/" + modulo.nombre.replace(".","-")  
     else:    
-        path = "/Python/" 
+        path = "/Python" 
 
     basepath = modulo.nombre.replace(".","-")
     clave = "Python."+modulo.nombre[0]+ "." + modulo.nombre 
