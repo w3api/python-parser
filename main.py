@@ -36,6 +36,23 @@ def set_default(obj):
         return obj.__dict__
     raise TypeError
 
+def obtener_constantes(cadena):
+
+    cadena1 = cadena[:cadena.index("...")-1]
+    inicio_cadena1 = cadena1[:cadena1.index("_")+1]
+    numero_cadena1 = int(cadena1[cadena1.index("_")+1:])
+
+    cadena2 = cadena[cadena.index("...")+4:]
+    inicio_cadena2 = cadena2[:cadena2.index("_")+1]
+    numero_cadena2 = int(cadena2[cadena2.index("_")+1:])
+
+    lista = []
+
+    for x in range(numero_cadena1,numero_cadena2+1):
+        lista.append(inicio_cadena1 + str(x))
+
+    return lista
+
 
 def limpiar(cadena):
     return " ".join(cadena.replace('¶','').split())
@@ -97,7 +114,7 @@ def obtener_atributos(clase):
         
         dAtributo = Atributo()
         dAtributo.nombre = nombre.text
-        dAtributo.sintaxis = limpiar(sintaxis.text)
+        dAtributo.add_sintaxis (limpiar(sintaxis.text))
         lista.append(dAtributo)
 
     return lista
@@ -186,6 +203,7 @@ def analiza_modulo(dModulo,URL):
             nombre = s.find("code", {"class":"sig-name descname"})                    
             parametros = obtener_parametros(nombre)            
 
+            dFuncion.add_sintaxis(limpiar(s.text))
             for parametro in parametros:
                 dFuncion.add_parametro(parametro)
 
@@ -274,7 +292,7 @@ def analiza_modulo(dModulo,URL):
 
                 dMetodo = Metodo()
                 dMetodo.nombre = nombre.text
-                dMetodo.sintaxis = limpiar(s.text)
+                dMetodo.add_sintaxis(limpiar(s.text))
                 for parametro in parametros:
                     dMetodo.add_parametro(parametro)                
 
@@ -305,7 +323,7 @@ def analiza_modulo(dModulo,URL):
 
             dAtributo = Atributo()
             dAtributo.nombre = nombre.text
-            dAtributo.sintaxis = limpiar(sintaxis.text)
+            dAtributo.add_sintaxis(limpiar(sintaxis.text))
 
             posicion = existe_clase(dModulo,clase.text[:-1])
             if (posicion >= 0):
@@ -325,11 +343,19 @@ def analiza_modulo(dModulo,URL):
         sintaxis = constante.find("dt")        
         nombre = sintaxis.find("code", {"class":"sig-name descname"})
 
-        dConstante = Constante()
-        dConstante.nombre = nombre.text
-        dConstante.sintaxis = limpiar(sintaxis.text)
-        
-        dModulo.add_constante(dConstante)
+        if "..." in nombre.text:
+            constantes = obtener_constantes(nombre.text)
+            for constante in constantes:
+                dConstante = Constante()
+                dConstante.nombre = constante
+                dConstante.add_sintaxis(limpiar(sintaxis.text))
+                dModulo.add_constante(dConstante)
+        else:
+            dConstante = Constante()
+            dConstante.nombre = nombre.text
+            dConstante.add_sintaxis(limpiar(sintaxis.text))
+            
+            dModulo.add_constante(dConstante)
 
     # Excepciones
     print ("----------EXCEPCIONES---------")
@@ -340,7 +366,7 @@ def analiza_modulo(dModulo,URL):
 
         dExcepcion = Excepcion()
         dExcepcion.nombre = nombre.text
-        dExcepcion.sintaxis = limpiar(sintaxis.text)     
+        dExcepcion.add_sintaxis(limpiar(sintaxis.text))
         
         dModulo.add_execpcion(dExcepcion)
 
@@ -358,7 +384,6 @@ def analizar_modulo(URL):
 print ("Analizando la documentación Python")
 documentacion = []
 
-
 URLFUNCIONES = "https://docs.python.org/es/3/library/functions.html"
 URLTIPOS = "https://docs.python.org/es/3/library/stdtypes.html"
 URLEXCEPCIONES = "https://docs.python.org/es/3/library/exceptions.html"
@@ -368,8 +393,9 @@ URLMODULOSBASE = "https://docs.python.org/es/3/"
 # 1. Funciones Base
 print ("Analizando el módulo Base")
 dModulo = Modulo()
-dModulo.nombre = "Base"
+dModulo.nombre = "base"
 dModulo = analiza_modulo(dModulo,URLFUNCIONES)
+
 
 # 2. Tipos Base
 # Reutilizamos el mismo módulo que la base
@@ -382,6 +408,7 @@ print ("Analizando el módulo Excepciones")
 dModulo = analiza_modulo(dModulo,URLEXCEPCIONES)
 
 documentacion.append(dModulo)
+
 
 # 4. Módulos
 page = requests.get(URLMODULOS)
@@ -402,6 +429,24 @@ for modulo in modulos:
 f = open("data.json","w")
 f.write(json.dumps(documentacion,default=set_default,indent=4))
 f.close()
+
+# Cargamos el JSON para ir más rápdio
+#with open('data.json') as f:
+#    documentacion = json.load(f)
+
+
+for modulo in documentacion:
+
+    writer.doc_modulo(modulo)
+
+    for funcion in modulo.funciones:
+        writer.doc_funcion(funcion,modulo.nombre)
+    for clase in modulo.clases:
+        writer.doc_clase(clase,modulo.nombre)
+    for excecpion in modulo.excepciones:
+        writer.doc_excepcion(excecpion,modulo.nombre) 
+    for constante in modulo.constantes:
+        writer.doc_constante(constante,modulo.nombre) 
 
 
 '''
