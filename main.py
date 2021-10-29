@@ -99,6 +99,7 @@ def obtener_metodos(clase):
 
         lista.append(dMetodo)
 
+
     return lista
  
     
@@ -145,6 +146,8 @@ def existe_metodo(dClase,dMetodo):
         
         if (dClase.metodos[x].nombre == dMetodo.nombre):
             # Hemos encontrado el método
+            
+            '''
             y=0
             encontradoSintaxis = False            
 
@@ -159,10 +162,15 @@ def existe_metodo(dClase,dMetodo):
             
             if (not encontrado):
                 x = x+1
+            '''
+            encontrado = True
         else:
             x = x+1
 
-    return encontrado    
+    if encontrado:
+        return x
+    else:
+        return -1   
 
 def analiza_modulo(dModulo,URL):
 
@@ -231,8 +239,17 @@ def analiza_modulo(dModulo,URL):
             dConstructor.add_parametro(parametro)
 
         for metodo in metodos:
-            if not existe_metodo(dClase,metodo):   
+            posicion = existe_metodo(dClase,metodo)
+            if (posicion<0):   
+                # no existe el método
                 dClase.add_metodo(metodo)
+            else:
+                # existe, metemos sintaxis y parámetros
+                for sintaxis in metodo.sintaxis:
+                    dClase.metodos[posicion].add_sintaxis(sintaxis)
+                for parametro in metodos.parametros:
+                    dClase.metodos[posicion].add_parametro(parametro)
+
         
 
         # Comprobamos si hay dt al mismo nivel con más signatura
@@ -246,10 +263,19 @@ def analiza_modulo(dModulo,URL):
             for parametro in parametros:
                 dConstructor.add_parametro(parametro)
 
-            for metodo in metodos:
-                dClase.add_metodo(metodo)
-        
+            for metodo in metodos:                
+                posicion = existe_metodo(dClase,metodo)
+                if (posicion<0):   
+                    # no existe el método
+                    dClase.add_metodo(metodo)
+                else:
+                    # existe, metemos sintaxis y parámetros
+                    for sintaxis in metodo.sintaxis:
+                        dClase.metodos[posicion].add_sintaxis(sintaxis)
+                    for parametro in metodo.parametros:
+                        dClase.metodos[posicion].add_parametro(parametro)
 
+        
         dClase.add_constructor(dConstructor)
 
         atributos = obtener_atributos(clase)
@@ -263,8 +289,21 @@ def analiza_modulo(dModulo,URL):
             for constructor in dClase.constructores:                
                 dModulo.clases[posicion].add_constructor(constructor)
             for metodo in dClase.metodos:
-                if not existe_metodo(dModulo.clases[posicion],metodo):
+
+                posicion_metodo = existe_metodo(dModulo.clases[posicion],metodo)
+                if (posicion_metodo<0):   
+                    # no existe el método
                     dModulo.clases[posicion].add_metodo(metodo)
+                else:
+                    # existe, metemos sintaxis y parámetros
+                    for sintaxis in metodo.sintaxis:
+                        dModulo.clases[posicion].metodos[posicion_metodo].add_sintaxis(sintaxis)
+                    for parametro in metodo.parametros:
+                        dModulo.clases[posicion].metodos[posicion_metodo].add_parametro(parametro)
+
+                    
+
+
             for atributo in dClase.atributos:
                 dModulo.clases[posicion].add_atributo(atributo)               
         else:        
@@ -299,11 +338,23 @@ def analiza_modulo(dModulo,URL):
                 # Hay que ver si actualizamos sobre una clase que existe o sobre una nueva
                 posicion = existe_clase(dModulo,clase.text[:-1])
      
-                if (posicion >= 0):                
-                    # Chequeamos que el método no existe (nombre y sintaxis)
-                    if not existe_metodo(dModulo.clases[posicion],dMetodo):                        
+                if (posicion >= 0):    
+                    # Existe la Clase            
+
+                    posicion_metodo = existe_metodo(dModulo.clases[posicion],dMetodo)
+                    if (posicion_metodo<0):   
+                        # no existe el método                        
                         dModulo.clases[posicion].add_metodo(dMetodo)
+                    else:
+                        # existe, metemos sintaxis y parámetros                    
+                        for sintaxis in dMetodo.sintaxis:
+                            dModulo.clases[posicion].metodos[posicion_metodo].add_sintaxis(sintaxis)
+                        for parametro in dMetodo.parametros:
+                            dModulo.clases[posicion].metodos[posicion_metodo].add_parametro(parametro)
+
                 else:
+                    # No Existe la Clase
+
                     dClase = Clase()
                     dClase.nombre = clase.text[:-1]
                     dClase.add_metodo(dMetodo)
@@ -390,6 +441,7 @@ URLEXCEPCIONES = "https://docs.python.org/es/3/library/exceptions.html"
 URLMODULOS = "https://docs.python.org/es/3/py-modindex.html"
 URLMODULOSBASE = "https://docs.python.org/es/3/"
 
+
 # 1. Funciones Base
 print ("Analizando el módulo Base")
 dModulo = Modulo()
@@ -424,6 +476,13 @@ for modulo in modulos:
     dModulo = analiza_modulo(dModulo,URLMODULOSBASE + modulo.get("href"))    
     documentacion.append(dModulo)
 
+''' -- PRUEBA UN MODULO
+dModulo = Modulo()
+dModulo.nombre = "socket"
+print ("Analizando el módulo Excepciones")
+dModulo = analiza_modulo(dModulo,"https://docs.python.org/es/3/library/socket.html")
+documentacion.append(dModulo)
+'''
 
 # Generamos el JSON
 f = open("data.json","w")
