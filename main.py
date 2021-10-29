@@ -441,13 +441,11 @@ URLEXCEPCIONES = "https://docs.python.org/es/3/library/exceptions.html"
 URLMODULOS = "https://docs.python.org/es/3/py-modindex.html"
 URLMODULOSBASE = "https://docs.python.org/es/3/"
 
-
 # 1. Funciones Base
 print ("Analizando el módulo Base")
 dModulo = Modulo()
 dModulo.nombre = "base"
 dModulo = analiza_modulo(dModulo,URLFUNCIONES)
-
 
 # 2. Tipos Base
 # Reutilizamos el mismo módulo que la base
@@ -460,7 +458,6 @@ print ("Analizando el módulo Excepciones")
 dModulo = analiza_modulo(dModulo,URLEXCEPCIONES)
 
 documentacion.append(dModulo)
-
 
 # 4. Módulos
 page = requests.get(URLMODULOS)
@@ -506,44 +503,3 @@ for modulo in documentacion:
         writer.doc_excepcion(excecpion,modulo.nombre) 
     for constante in modulo.constantes:
         writer.doc_constante(constante,modulo.nombre) 
-
-
-'''
-def lista_funciones(URL,lista):
-
-    page = requests.get(URL)
-    soup = BeautifulSoup(page.content, 'html5lib')
-
-
-    nombre_capa = URL[URL.index("#")+1:]
-    #print (nombre_capa)
-    
-    capa = soup.find("div",{"id":nombre_capa})
-    if not capa:
-        capa = soup.find("span",{"id":nombre_capa})
-
-    funciones = capa.find_all("dl", {"class":"py function"})
-    
-    for funcion in funciones:    
-        # Buscamos la primera sintaxis
-        sintaxis = funcion.find("dt")
-        nombre = sintaxis.find("code", {"class":"sig-name descname"})        
-
-        if any(dictionary for dictionary in lista if dictionary["nombre"] == nombre.text):
-            print ("COINCIDE " + nombre.text)
-            print (next(dictionary for dictionary in lista if dictionary["nombre"] == nombre.text))
-        else:
-            e = {
-                "nombre": nombre.text,
-                "modulo": nombre_capa
-            }
-            # print(e)
-            lista.append(e)
-
-    return lista
-'''
-
-
-
-
-
