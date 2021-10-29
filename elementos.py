@@ -123,19 +123,19 @@ class Clase:
 class Metodo:
 
     nombre = ""
-    sintaxis = []
+    sintaxis = set()
     parametros = set()
 
     def __init__(self):
         self.nombre = ""
-        self.sintaxis = []
+        self.sintaxis = set()
         self.parametros = set()
 
     def nombre(self,nombre):
         self.nombre = nombre
     
     def add_sintaxis(self,sintaxis):
-        self.sintaxis.append(sintaxis)
+        self.sintaxis.add(sintaxis)
 
     def add_parametro(self,parametro):
         self.parametros.add(parametro)
