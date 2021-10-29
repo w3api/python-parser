@@ -403,7 +403,7 @@ def analiza_modulo(dModulo,URL):
                 dModulo.add_constante(dConstante)
         else:
             dConstante = Constante()
-            dConstante.nombre = nombre.text
+            dConstante.nombre = nombre.text.replace("*","")
             dConstante.add_sintaxis(limpiar(sintaxis.text))
             
             dModulo.add_constante(dConstante)
