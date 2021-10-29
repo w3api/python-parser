@@ -17,6 +17,7 @@ URL                             tag                 modulo          json
 
 __OUT__ = "/Users/victor/GitHub/w3api-portal/_posts/Python/"
 __OUTJSON__ = "/Users/victor/GitHub/w3api-portal/_data/Python/"
+__OUTTAGS__ = "/Users/victor/GitHub/w3api-portal/tags/Python/"
 
 def doc_JSON(elemento,nombre_modulo):
 
@@ -126,14 +127,14 @@ def gen_cabecera(nombre,path,clave,tags):
                 "---" + "\n\n"]
     return c
 
-def gen_cabecera_tag(tipo, nombre, titulo):
+def gen_cabecera_tag(lenguaje, tipo_elemento, nombre):
 
     c = ["---" + "\n",
-                "title: \"" + titulo + " " + nombre + "\"\n",
+                "title: \"" + tipo_elemento + " " + nombre + "\"\n",
                 "layout: tag\n",
-                "permalink: /html/tag/" + nombre + "/\n",
+                "permalink: /" + lenguaje + "/tag/" + nombre + "/\n",
                 "date: " + str(datetime.now()) + "\n",
-                "key: " + tipo + nombre + "\n",
+                "key: " + lenguaje + "." + nombre + "\n",
                 "sidebar: " + "\n",
                 "  nav: python" + "\n",
                 "aside: " + "\n",
@@ -695,3 +696,20 @@ def doc_modulo(modulo):
     f.close()
 
     #doc_JSON(clase,nombre_modulo)
+
+
+def doc_listado_modulos(nombre_modulo):
+
+    if not os.path.exists(__OUTTAGS__ + "modulos/"):
+        os.makedirs(__OUTTAGS__ + "modulos/")
+
+    f = open(__OUTTAGS__ + "modulos/"+ nombre_modulo + ".md","w")
+
+    cabecera = gen_cabecera_tag("Python","Módulo",nombre_modulo)
+    f.writelines(cabecera)
+
+    contenido = ["<h2>Modulos</h2>\n",
+                "Todos los elementos del modulo <strong>" + nombre_modulo + "</strong>\n"]
+    f.writelines(contenido)
+
+    f.close()
