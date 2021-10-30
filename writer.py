@@ -25,15 +25,15 @@ def doc_JSON(elemento,nombre_modulo):
     if not nombre_modulo == "base":
         basepath = nombre_modulo
 
-        if not os.path.exists(__OUTJSON__ + basepath[0] + "/" + basepath + "/"):        
-            os.makedirs(__OUTJSON__ + basepath[0] + "/" + basepath + "/")
+        if not os.path.exists(__OUTJSON__ + basepath[0].upper() + "/" + basepath + "/"):        
+            os.makedirs(__OUTJSON__ + basepath[0].upper() + "/" + basepath + "/")
 
         # Clases como AbstractDocument.AttributeContext se generan en un directorio
         f = open(__OUTJSON__ + basepath[0] + "/" + basepath + "/" + elemento.nombre + ".json","w")
     else:
 
-        if not os.path.exists(__OUTJSON__ + elemento.nombre[0] + "/"):        
-            os.makedirs(__OUTJSON__ + elemento.nombre[0] + "/")
+        if not os.path.exists(__OUTJSON__ + elemento.nombre[0].upper() + "/"):        
+            os.makedirs(__OUTJSON__ + elemento.nombre[0].upper() + "/")
 
         # Clases como AbstractDocument.AttributeContext se generan en un directorio
         f = open(__OUTJSON__ + elemento.nombre[0] + "/" + elemento.nombre + ".json","w")
@@ -43,6 +43,10 @@ def doc_JSON(elemento,nombre_modulo):
     data_json["description"] = ""
     data_json["code"] = ""
     data_json["ldc"] = []
+    s = ""
+    for sintaxis in elemento.sintaxis:
+        s = s + sintaxis + "\n"
+    data_json["sintaxis"] = s
 
     if hasattr(elemento,"parametros"):
         p = []
@@ -62,6 +66,10 @@ def doc_JSON(elemento,nombre_modulo):
             atributo_json["description"] = ""
             atributo_json["code"] = ""
             atributo_json["ldc"] = []
+            s = ""
+            for sintaxis in atributo.sintaxis:
+                s = s + sintaxis + "\n"
+            atributo_json["sintaxis"] = s
                     
             a.append(atributo_json)
         data_json["atributos"] = a
@@ -74,6 +82,10 @@ def doc_JSON(elemento,nombre_modulo):
             metodo_json["description"] = ""
             metodo_json["code"] = ""
             metodo_json["ldc"] = []
+            s = ""
+            for sintaxis in metodo.sintaxis:
+                s = s + sintaxis + "\n"
+            metodo_json["sintaxis"] = s
 
             if hasattr(metodo,"parametros"):
                 p = []
@@ -95,6 +107,10 @@ def doc_JSON(elemento,nombre_modulo):
             constructor_json["description"] = ""
             constructor_json["code"] = ""
             constructor_json["ldc"] = []
+            s = ""
+            for sintaxis in constructor.sintaxis:
+                s = s + sintaxis + "\n"
+            constructor_json["sintaxis"] = s
 
             if hasattr(constructor,"parametros"):
                 p = []
@@ -146,13 +162,12 @@ def gen_cabecera_tag(lenguaje, tipo_elemento, nombre):
                 "---" + "\n\n"]
     return c
 
-def gen_sintaxis(sintaxis):
+def gen_sintaxis(base):
 
     s = ["## Sintaxis\n",
-          "~~~python\n"]
-    for sin in sintaxis:
-         s.append(sin + "\n")
-    s.append("~~~\n\n")
+          "~~~python\n",
+          "{{ " + base + ".sintaxis }}",
+          "~~~\n\n"]
     return s
 
 def gen_ldc(clave):
@@ -245,18 +260,18 @@ def doc_constante(constante,nombre_modulo):
     if not nombre_modulo == "base":
         basepath = nombre_modulo.replace(".","-") + "/" + constante.nombre
         clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + constante.nombre
-        jsonsource = "Python." + nombre_modulo[0] + "." + nombre_modulo.replace(".","") + "." + constante.nombre # Las base JSON compuestas se accede sin punto
+        jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + constante.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"        
     
     else:
         basepath = constante.nombre
         clave = "Python."+constante.nombre[0]+ "." + constante.nombre
-        jsonsource = "Python." + constante.nombre[0] + "." + constante.nombre # Las base JSON compuestas se accede sin punto
+        jsonsource = "Python." + constante.nombre[0].upper() + "." + constante.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
 
-    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
-        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+    if not os.path.exists(__OUT__ + basepath[0].upper() + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0].upper() + "/" + basepath + "/")
 
     f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + constante.nombre + ".md","w")
 
@@ -274,7 +289,7 @@ def doc_constante(constante,nombre_modulo):
     descripcion = gen_descripcion("site.data." + jsonsource)
     f.writelines(descripcion)
 
-    sintaxis = gen_sintaxis(constante.sintaxis)
+    sintaxis = gen_sintaxis("site.data." + jsonsource)
     f.writelines(sintaxis)
 
     ejemplo = gen_ejemplo("site.data." + jsonsource)
@@ -293,18 +308,18 @@ def doc_excepcion(excepcion,nombre_modulo):
     if not nombre_modulo == "base":
         basepath = nombre_modulo.replace(".","-") + "/" + excepcion.nombre
         clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + excepcion.nombre
-        jsonsource = "Python." + nombre_modulo[0] + "." + nombre_modulo.replace(".","") + "." + excepcion.nombre # Las base JSON compuestas se accede sin punto
+        jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + excepcion.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"        
     
     else:
         basepath = excepcion.nombre
         clave = "Python."+excepcion.nombre[0]+ "." + excepcion.nombre
-        jsonsource = "Python." + excepcion.nombre[0] + "." + excepcion.nombre # Las base JSON compuestas se accede sin punto
+        jsonsource = "Python." + excepcion.nombre[0].upper() + "." + excepcion.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
 
-    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
-        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+    if not os.path.exists(__OUT__ + basepath[0].upper() + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0].upper() + "/" + basepath + "/")
 
     f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + excepcion.nombre + ".md","w")
 
@@ -321,7 +336,7 @@ def doc_excepcion(excepcion,nombre_modulo):
     descripcion = gen_descripcion("site.data." + jsonsource)
     f.writelines(descripcion)
 
-    sintaxis = gen_sintaxis(excepcion.sintaxis)
+    sintaxis = gen_sintaxis("site.data." + jsonsource)
     f.writelines(sintaxis)
 
     ejemplo = gen_ejemplo("site.data." + jsonsource)
@@ -340,19 +355,19 @@ def doc_funcion(funcion,nombre_modulo):
     if not nombre_modulo == "base":
         basepath = nombre_modulo.replace(".","-") + "/" + funcion.nombre
         clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + funcion.nombre
-        jsonsource = "Python." + nombre_modulo[0] + "." + nombre_modulo.replace(".","") + "." + funcion.nombre # Las base JSON compuestas se accede sin punto
+        jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + funcion.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
     
     else:
         basepath = funcion.nombre
         clave = "Python."+funcion.nombre[0]+ "." + funcion.nombre
-        jsonsource = "Python." + funcion.nombre[0] + "." + funcion.nombre # Las base JSON compuestas se accede sin punto
+        jsonsource = "Python." + funcion.nombre[0].upper() + "." + funcion.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
 
-    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
-        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+    if not os.path.exists(__OUT__ + basepath[0].upper() + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0].upper() + "/" + basepath + "/")
 
     f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + funcion.nombre + ".md","w")
 
@@ -374,7 +389,7 @@ def doc_funcion(funcion,nombre_modulo):
     descripcion = gen_descripcion("site.data." + jsonsource)
     f.writelines(descripcion)
 
-    sintaxis = gen_sintaxis(funcion.sintaxis)
+    sintaxis = gen_sintaxis("site.data." + jsonsource)
     f.writelines(sintaxis)
 
     if funcion.parametros:
@@ -398,19 +413,19 @@ def doc_clase(clase,nombre_modulo):
     if not nombre_modulo == "base":
         basepath = nombre_modulo.replace(".","-") + "/" + clase.nombre
         clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + clase.nombre
-        jsonsource = "Python." + nombre_modulo[0] + "." + nombre_modulo.replace(".","") + "." + clase.nombre # Las base JSON compuestas se accede sin punto
+        jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + clase.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
     
     else:
         basepath = clase.nombre
         clave = "Python."+clase.nombre[0]+ "." + clase.nombre
-        jsonsource = "Python." + clase.nombre[0] + "." + clase.nombre # Las base JSON compuestas se accede sin punto
+        jsonsource = "Python." + clase.nombre[0].upper() + "." + clase.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
 
-    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
-        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+    if not os.path.exists(__OUT__ + basepath[0].upper() + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0].upper() + "/" + basepath + "/")
 
     f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + clase.nombre + ".md","w")
 
@@ -432,8 +447,8 @@ def doc_clase(clase,nombre_modulo):
     descripcion = gen_descripcion("site.data." + jsonsource)
     f.writelines(descripcion)
 
-    #sintaxis = gen_sintaxis(clase.sintaxis)
-    #f.writelines(sintaxis)
+    sintaxis = gen_sintaxis("site.data." + jsonsource)
+    f.writelines(sintaxis)
 
     if clase.constructores:
         constructores = gen_constructores(clase.constructores,basepath)
@@ -474,20 +489,20 @@ def doc_atributo(clase,nombre_modulo):
     else:
         basepath = clase.nombre
 
-    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
-        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+    if not os.path.exists(__OUT__ + basepath[0].upper() + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0].upper() + "/" + basepath + "/")
 
 
     for atributo in clase.atributos:
 
         if not nombre_modulo == "base":            
             clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + clase.nombre + "." + atributo.nombre
-            jsonsource = "Python." + nombre_modulo[0] + "." + nombre_modulo.replace(".","") + "." + clase.nombre # Las base JSON compuestas se accede sin punto
+            jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + clase.nombre # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + atributo.nombre + "/"  
         
         else:            
             clave = "Python."+clase.nombre[0]+ "." + clase.nombre + "." + atributo.nombre
-            jsonsource = "Python." + clase.nombre[0] + "." + clase.nombre # Las base JSON compuestas se accede sin punto
+            jsonsource = "Python." + clase.nombre[0].upper() + "." + clase.nombre # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + atributo.nombre + "/"
 
         f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + clase.nombre + "." + atributo.nombre + ".md","w")
@@ -508,7 +523,7 @@ def doc_atributo(clase,nombre_modulo):
         descripcion = gen_descripcion("_dato")
         f.writelines(descripcion)
 
-        sintaxis = gen_sintaxis(atributo.sintaxis)
+        sintaxis = gen_sintaxis("_dato")
         f.writelines(sintaxis)
 
         clase_padre = gen_clasepadre(clase.nombre,basepath)
@@ -530,20 +545,20 @@ def doc_metodo(clase,nombre_modulo):
         basepath = clase.nombre
         
 
-    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
-        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+    if not os.path.exists(__OUT__ + basepath[0].upper() + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0].upper() + "/" + basepath + "/")
 
 
     for metodo in clase.metodos:
 
         if not nombre_modulo == "base":            
             clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + clase.nombre + "." + metodo.nombre
-            jsonsource = "Python." + nombre_modulo[0] + "." + nombre_modulo.replace(".","") + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
+            jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + metodo.nombre + "/"  
         
         else:            
             clave = "Python."+clase.nombre[0]+ "." + clase.nombre + "." + metodo.nombre
-            jsonsource = "Python." + clase.nombre[0] + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
+            jsonsource = "Python." + clase.nombre[0].upper() + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + metodo.nombre + "/"
 
         f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + clase.nombre + "." + metodo.nombre + ".md","w")
@@ -564,7 +579,7 @@ def doc_metodo(clase,nombre_modulo):
         descripcion = gen_descripcion("_dato")
         f.writelines(descripcion)
 
-        sintaxis = gen_sintaxis(metodo.sintaxis)
+        sintaxis = gen_sintaxis("_dato")
         f.writelines(sintaxis)
 
         if metodo.parametros:
@@ -590,20 +605,20 @@ def doc_constructor(clase,nombre_modulo):
         basepath = clase.nombre
         
 
-    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
-        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+    if not os.path.exists(__OUT__ + basepath[0].upper() + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0].upper() + "/" + basepath + "/")
 
 
     for metodo in clase.constructores:
 
         if not nombre_modulo == "base":            
             clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + clase.nombre + "." + metodo.nombre
-            jsonsource = "Python." + nombre_modulo[0] + "." + nombre_modulo.replace(".","") + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
+            jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + metodo.nombre + "/"  
         
         else:            
             clave = "Python."+clase.nombre[0]+ "." + clase.nombre + "." + metodo.nombre
-            jsonsource = "Python." + clase.nombre[0] + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
+            jsonsource = "Python." + clase.nombre[0].upper() + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + metodo.nombre + "/"
 
         f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + clase.nombre + "." + metodo.nombre + ".md","w")
@@ -624,7 +639,7 @@ def doc_constructor(clase,nombre_modulo):
         descripcion = gen_descripcion("_dato")
         f.writelines(descripcion)
 
-        sintaxis = gen_sintaxis(metodo.sintaxis)
+        sintaxis = gen_sintaxis("_dato")
         f.writelines(sintaxis)
 
         if metodo.parametros:
@@ -653,11 +668,11 @@ def doc_modulo(modulo):
 
     basepath = modulo.nombre.replace(".","-")
     clave = "Python."+modulo.nombre[0]+ "." + modulo.nombre 
-    jsonsource = "Python." + modulo.nombre[0] + "." + modulo.nombre.replace(".","") # Las base JSON compuestas se accede sin punto
+    jsonsource = "Python." + modulo.nombre[0].upper() + "." + modulo.nombre.replace(".","") # Las base JSON compuestas se accede sin punto
               
 
-    if not os.path.exists(__OUT__ + basepath[0] + "/" + basepath + "/"):
-        os.makedirs(__OUT__ + basepath[0] + "/" + basepath + "/")
+    if not os.path.exists(__OUT__ + basepath[0].upper() + "/" + basepath + "/"):
+        os.makedirs(__OUT__ + basepath[0].upper() + "/" + basepath + "/")
 
     f = open(__OUT__ + basepath[0] + "/" + basepath + "/2021-01-01-" + modulo.nombre + ".md","w")
 
