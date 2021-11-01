@@ -68,7 +68,7 @@ class Funcion:
 
     def add_parametro(self,parametro):
         self.parametros.add(parametro)
-        self.parametros.sort()
+        self.parametros = sorted(self.parametros)
 
     def __str__(self):
         cadena = "Nombre: " + self.nombre + "\n"
@@ -112,6 +112,8 @@ class Clase:
                 self.constructores[0].add_sintaxis(sintaxis)
             for parametro in constructor.parametros:
                 self.constructores[0].add_parametro(parametro)
+
+        self.constructores.sort()
             
 
     def add_metodo(self,metodo):
@@ -157,7 +159,7 @@ class Metodo:
 
     def add_parametro(self,parametro):
         self.parametros.add(parametro)
-        self.parametros.sort()
+        self.parametros = sorted(self.parametros)
 
     def __str__(self):
         cadena = "Nombre: " + self.nombre + "\n"
@@ -192,7 +194,7 @@ class Constructor:
 
     def add_parametro(self,parametro):
         self.parametros.add(parametro)
-        self.parametros.sort()
+        self.parametros = sorted(self.parametros)        
 
     def __str__(self):
         cadena = "Nombre: " + self.nombre + "\n"
