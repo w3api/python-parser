@@ -121,8 +121,8 @@ def doc_JSON(elemento,nombre_modulo):
                     p.append(parametro_json)                
                 constructor_json["parametros"] = p
 
-            m.append(constructor_json)
-        data_json["constructores"] = m
+            c.append(constructor_json)
+        data_json["constructores"] = c
 
     f.write(json.dumps(data_json,indent=4))
     f.close()
@@ -148,7 +148,7 @@ def gen_cabecera_tag(lenguaje, tipo_elemento, nombre):
     c = ["---" + "\n",
                 "title: \"" + tipo_elemento + " " + nombre + "\"\n",
                 "layout: tag\n",
-                "permalink: /" + lenguaje + "/tag/" + nombre + "/\n",
+                "permalink: /" + lenguaje + "/tag/" + nombre.replace(".","-") + "/\n",
                 "date: " + str(datetime.now()) + "\n",
                 "key: " + lenguaje + "." + nombre + "\n",
                 "sidebar: " + "\n",
@@ -281,9 +281,9 @@ def doc_constante(constante,nombre_modulo):
     tags.append(nombre_modulo.replace(".","-"))
 
     if not nombre_modulo == "base":
-        cabecera = gen_cabecera(nombre_modulo + "." + constante.nombre,path,clave, tags)
+        cabecera = gen_cabecera(nombre_modulo + "." + constante.nombre,path,clave,tags)
     else:
-        cabecera = gen_cabecera(constante.nombre,path,clave, tags)
+        cabecera = gen_cabecera(constante.nombre,path,clave,tags)
     f.writelines(cabecera)
 
     descripcion = gen_descripcion("site.data." + jsonsource)
