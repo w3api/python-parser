@@ -157,7 +157,7 @@ def gen_cabecera_tag(lenguaje, tipo_elemento, nombre):
                 "  toc: true" + "\n",
                 "pagination: " + "\n",
                 "  enabled: true" + "\n",
-                "  tag: \"" + nombre + "\"\n",
+                "  tag: \"" + nombre.replace(".","-") + "\"\n",
                 "  permalink: /:num/" + "\n",
                 "---" + "\n\n"]
     return c
@@ -259,13 +259,13 @@ def doc_constante(constante,nombre_modulo):
 
     if not nombre_modulo == "base":
         basepath = nombre_modulo.replace(".","-") + "/" + constante.nombre
-        clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + constante.nombre
+        clave = "Python."+nombre_modulo[0].upper()+ "." + nombre_modulo + "." + constante.nombre
         jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + constante.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"        
     
     else:
         basepath = constante.nombre
-        clave = "Python."+constante.nombre[0]+ "." + constante.nombre
+        clave = "Python."+constante.nombre[0].upper()+ "." + constante.nombre
         jsonsource = "Python." + constante.nombre[0].upper() + "." + constante.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
@@ -307,13 +307,13 @@ def doc_excepcion(excepcion,nombre_modulo):
 
     if not nombre_modulo == "base":
         basepath = nombre_modulo.replace(".","-") + "/" + excepcion.nombre
-        clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + excepcion.nombre
+        clave = "Python."+nombre_modulo[0].upper()+ "." + nombre_modulo + "." + excepcion.nombre
         jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + excepcion.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"        
     
     else:
         basepath = excepcion.nombre
-        clave = "Python."+excepcion.nombre[0]+ "." + excepcion.nombre
+        clave = "Python."+excepcion.nombre[0].upper()+ "." + excepcion.nombre
         jsonsource = "Python." + excepcion.nombre[0].upper() + "." + excepcion.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
@@ -354,14 +354,14 @@ def doc_funcion(funcion,nombre_modulo):
 
     if not nombre_modulo == "base":
         basepath = nombre_modulo.replace(".","-") + "/" + funcion.nombre
-        clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + funcion.nombre
+        clave = "Python."+nombre_modulo[0].upper()+ "." + nombre_modulo + "." + funcion.nombre
         jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + funcion.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
     
     else:
         basepath = funcion.nombre
-        clave = "Python."+funcion.nombre[0]+ "." + funcion.nombre
+        clave = "Python."+funcion.nombre[0].upper()+ "." + funcion.nombre
         jsonsource = "Python." + funcion.nombre[0].upper() + "." + funcion.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
@@ -412,14 +412,14 @@ def doc_clase(clase,nombre_modulo):
 
     if not nombre_modulo == "base":
         basepath = nombre_modulo.replace(".","-") + "/" + clase.nombre
-        clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + clase.nombre
+        clave = "Python."+nombre_modulo[0].upper()+ "." + nombre_modulo + "." + clase.nombre
         jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + clase.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
     
     else:
         basepath = clase.nombre
-        clave = "Python."+clase.nombre[0]+ "." + clase.nombre
+        clave = "Python."+clase.nombre[0].upper()+ "." + clase.nombre
         jsonsource = "Python." + clase.nombre[0].upper() + "." + clase.nombre # Las base JSON compuestas se accede sin punto
         path = "/Python/"+basepath + "/"
         
@@ -496,12 +496,12 @@ def doc_atributo(clase,nombre_modulo):
     for atributo in clase.atributos:
 
         if not nombre_modulo == "base":            
-            clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + clase.nombre + "." + atributo.nombre
+            clave = "Python."+nombre_modulo[0].upper()+ "." + nombre_modulo + "." + clase.nombre + "." + atributo.nombre
             jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + clase.nombre # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + atributo.nombre + "/"  
         
         else:            
-            clave = "Python."+clase.nombre[0]+ "." + clase.nombre + "." + atributo.nombre
+            clave = "Python."+clase.nombre[0].upper()+ "." + clase.nombre + "." + atributo.nombre
             jsonsource = "Python." + clase.nombre[0].upper() + "." + clase.nombre # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + atributo.nombre + "/"
 
@@ -552,12 +552,12 @@ def doc_metodo(clase,nombre_modulo):
     for metodo in clase.metodos:
 
         if not nombre_modulo == "base":            
-            clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + clase.nombre + "." + metodo.nombre
+            clave = "Python."+nombre_modulo[0].upper()+ "." + nombre_modulo + "." + clase.nombre + "." + metodo.nombre
             jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + metodo.nombre + "/"  
         
         else:            
-            clave = "Python."+clase.nombre[0]+ "." + clase.nombre + "." + metodo.nombre
+            clave = "Python."+clase.nombre[0].upper()+ "." + clase.nombre + "." + metodo.nombre
             jsonsource = "Python." + clase.nombre[0].upper() + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + metodo.nombre + "/"
 
@@ -612,12 +612,12 @@ def doc_constructor(clase,nombre_modulo):
     for metodo in clase.constructores:
 
         if not nombre_modulo == "base":            
-            clave = "Python."+nombre_modulo[0]+ "." + nombre_modulo + "." + clase.nombre + "." + metodo.nombre
+            clave = "Python."+nombre_modulo[0].upper()+ "." + nombre_modulo + "." + clase.nombre + "." + metodo.nombre
             jsonsource = "Python." + nombre_modulo[0].upper() + "." + nombre_modulo.replace(".","") + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + metodo.nombre + "/"  
         
         else:            
-            clave = "Python."+clase.nombre[0]+ "." + clase.nombre + "." + metodo.nombre
+            clave = "Python."+clase.nombre[0].upper()+ "." + clase.nombre + "." + metodo.nombre
             jsonsource = "Python." + clase.nombre[0].upper() + "." + clase.nombre  # Las base JSON compuestas se accede sin punto
             path = "/Python/"+basepath + "/" + metodo.nombre + "/"
 
@@ -667,7 +667,7 @@ def doc_modulo(modulo):
         path = "/Python" 
 
     basepath = modulo.nombre.replace(".","-")
-    clave = "Python."+modulo.nombre[0]+ "." + modulo.nombre 
+    clave = "Python."+modulo.nombre[0].upper()+ "." + modulo.nombre 
     jsonsource = "Python." + modulo.nombre[0].upper() + "." + modulo.nombre.replace(".","") # Las base JSON compuestas se accede sin punto
               
 
