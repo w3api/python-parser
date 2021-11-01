@@ -209,7 +209,7 @@ def gen_metodos(metodos,nombre):
         m.append("* [" + metodo.nombre + "](/Python/" + nombre + "/" + metodo.nombre + "/)\n")
     m.append("\n")
     return m
-
+'''
 def gen_parametros(parametros):
     p = ["## Parámetros\n"]
     for parametro in parametros:
@@ -222,11 +222,19 @@ def gen_parametros(parametros):
         p.append("{% include w3api/param_description.html metodo=_dato parametro=\"" + parametro + "\" %}\n")
     p.append("\n")
     return p    
+'''
 
 def gen_parametros_funcion(parametros,clave):
     p = ["## Parámetros\n"]
     for parametro in parametros:
-        p.append("* **" + html.escape(parametro) + "**,  ")
+
+        # Hay parámetros que son asteriscos
+        if parametro=="*":
+            parametro_texto = "\*"
+        else:
+            parametro_texto = parametro
+
+        p.append("* **" + html.escape(parametro_texto) + "**,  ")
         p.append("{% include w3api/function_param_description.html propiedad=" + clave + " valor=\"" + parametro + "\" %}\n")
     p.append("\n")
     return p    
@@ -583,7 +591,7 @@ def doc_metodo(clase,nombre_modulo):
         f.writelines(sintaxis)
 
         if metodo.parametros:
-            parametros = gen_parametros_funcion(metodo.parametros,"site.data." + clave)
+            parametros = gen_parametros_funcion(metodo.parametros,"_dato")
             f.writelines(parametros)
 
         clase_padre = gen_clasepadre(clase.nombre,basepath)
