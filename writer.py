@@ -278,7 +278,7 @@ def doc_constante(constante,nombre_modulo):
 
     tags = []
     tags.append("constante python")     
-    tags.append(nombre_modulo.replace(".","-"))
+    tags.append(nombre_modulo)
 
     if not nombre_modulo == "base":
         cabecera = gen_cabecera(nombre_modulo + "." + constante.nombre,path,clave,tags)
@@ -325,7 +325,7 @@ def doc_excepcion(excepcion,nombre_modulo):
 
     tags = []
     tags.append("excepcion python")     
-    tags.append(nombre_modulo.replace(".","-"))
+    tags.append(nombre_modulo)
 
     if not nombre_modulo == "base":
         cabecera = gen_cabecera(nombre_modulo + "." + excepcion.nombre,path,clave, tags)
@@ -374,7 +374,7 @@ def doc_funcion(funcion,nombre_modulo):
     
     tags = []
     tags.append("funcion python")     
-    tags.append(nombre_modulo.replace(".","-"))
+    tags.append(nombre_modulo)
 
 
     if not nombre_modulo == "base":
@@ -432,7 +432,7 @@ def doc_clase(clase,nombre_modulo):
     
     tags = []
     tags.append("clase python")     
-    tags.append(nombre_modulo.replace(".","-"))
+    tags.append(nombre_modulo)
 
 
     if not nombre_modulo == "base":
@@ -509,7 +509,7 @@ def doc_atributo(clase,nombre_modulo):
 
         tags = []
         tags.append("atributo python")     
-        tags.append(nombre_modulo.replace(".","-"))
+        tags.append(nombre_modulo)
 
         if not nombre_modulo == "base":
             cabecera = gen_cabecera(nombre_modulo + "." + clase.nombre + "." + atributo.nombre,path,clave, tags)
@@ -565,7 +565,7 @@ def doc_metodo(clase,nombre_modulo):
 
         tags = []
         tags.append("metodo python")     
-        tags.append(nombre_modulo.replace(".","-"))
+        tags.append(nombre_modulo)
 
         if not nombre_modulo == "base":
             cabecera = gen_cabecera(nombre_modulo + "." + clase.nombre + "." + metodo.nombre,path,clave, tags)
@@ -625,7 +625,7 @@ def doc_constructor(clase,nombre_modulo):
 
         tags = []
         tags.append("constructor python")     
-        tags.append(nombre_modulo.replace(".","-"))
+        tags.append(nombre_modulo)
 
         if not nombre_modulo == "base":
             cabecera = gen_cabecera(nombre_modulo + "." + clase.nombre + "." + metodo.nombre,path,clave, tags)
