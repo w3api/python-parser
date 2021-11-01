@@ -230,7 +230,8 @@ def analiza_modulo(dModulo,URL):
         metodos = obtener_metodos(clase)
 
         dClase = Clase()
-        dClase.nombre =  nombre.text
+        dClase.nombre = nombre.text
+        dClase.add_sintaxis("class " + nombre.text)
         
         dConstructor = Constructor()
         dConstructor.nombre = nombre.text
@@ -357,6 +358,7 @@ def analiza_modulo(dModulo,URL):
 
                     dClase = Clase()
                     dClase.nombre = clase.text[:-1]
+                    dClase.add_sintaxis("class " + clase.text[:-1])
                     dClase.add_metodo(dMetodo)
                     dModulo.add_clase(dClase)                
 
@@ -383,6 +385,7 @@ def analiza_modulo(dModulo,URL):
             else:
                 dClase = Clase()
                 dClase.nombre = clase.text[:-1]
+                dClase.add_sintaxis("class " + clase.text[:-1])
                 dClase.add_atributo(dAtributo)
                 dModulo.add_clase(dClase)
  
